@@ -432,6 +432,7 @@ input[type=number]::placeholder{color:var(--ink-dim);font-size:.66rem;letter-spa
       <li>Tap a fish to log a catch — the pool shrinks and the odds update.</li>
       <li>The band under the gauge tells you whether to break a line now or thin the pool first.</li>
       <li>Legendary catches feed the method tracker automatically; you get a nudge when a region's goal lands.</li>
+      <li>10× multipliers count themselves from your catches — ten fish is one multiplier, so emptying the pool is four. Use the ± if you ran 1× casts, which land fish without being a multiplier.</li>
       <li>Weight is the one thing the app can't read, so those rows stay manual.</li>
       <li>A Dragon Gate is a random extra region. Tap the amber button to fish it; a legendary you pull there counts toward the region you were working, and Undo takes it back.</li>
       <li>Track broken lines against the 120 cap.</li>
@@ -639,6 +640,8 @@ const TIER_VAR   = {SR:'--rare',MR:'--rare',LR:'--rare',SE:'--epic',LE:'--epic',
 const SHARE      = {SR:.375,MR:.25,LR:.125,SE:.15,LE:.075,LEG:.025};
 const BASELINE   = .025;
 const MAX_LINES  = 120;
+/* fish landed by one 10× multiplier draw */
+const MULT_FISH  = 10;
 const SETS       = ['1','2','3','4'];
 const DRAGON_LAKE = 'Dragon';
 
@@ -687,9 +690,24 @@ let state = {
   totals:Object.fromEntries(LAKES.map(l => [l,{fishCounts:blankPool()}])),
 };
 let questProgress = Object.fromEntries(QUESTS.map(q => [q.name, NaN]));
-const blankMethod = () => Object.fromEntries(METHOD.map(r => [r.lake,{mult:0,kg:NaN,tickets:NaN,scouted:false,dragon:0}]));
+const blankMethod = () => Object.fromEntries(METHOD.map(r => [r.lake,{multAdj:0,kg:NaN,tickets:NaN,scouted:false,dragon:0}]));
 let methodProgress = blankMethod();
 let themePref = 'auto';
+
+/* ---------------- 10× multipliers ----------------
+   How many multipliers have been run is a fact about the catch log rather than
+   something to tally by hand: one draw lands ten fish, so emptying a 40-fish pool
+   is four of them and ten individual taps is one. Deriving it also means Undo
+   takes a multiplier back for free, which a hand-kept counter never did.
+
+   multAdj is the correction for draws the log cannot see. It is signed on
+   purpose: the plan also has you run 1× casts for the weight step, and ten of
+   those land ten fish that were not a multiplier, so the count needs to come
+   down as well as up. Defined here, above the persistence layer, because
+   applyMethod migrates old records against it. */
+const caughtIn  = lake => TYPES.reduce((s,t) => s + state.totals[lake].fishCounts[t], 0);
+const multBase  = lake => Math.floor(caughtIn(lake) / MULT_FISH);
+const multRun   = lake => Math.max(0, multBase(lake) + (methodProgress[lake]?.multAdj || 0));
 
 /* ---------------- persistence ----------------
    Storage can be unavailable outright: Safari private mode throws on write, and
@@ -737,8 +755,15 @@ function applyMethod(d){
   if(!d) return;
   METHOD.forEach(r => {
     const s = d[r.lake]; if(!s) return;
+    /* Multipliers were a hand-kept absolute count before they were derived from
+       the catch log. Carry an old record over as an adjustment, so the total it
+       recorded is preserved without counting the same draws twice -- applyTracker
+       has already run, so the catch totals are in place to measure against. */
+    const multAdj = s.multAdj !== undefined
+      ? Number(s.multAdj) || 0
+      : Math.max(0, (Number(s.mult) || 0) - multBase(r.lake));
     methodProgress[r.lake] = {
-      mult: Number(s.mult) || 0,
+      multAdj,
       kg: s.kg === null || s.kg === undefined ? NaN : Number(s.kg),
       tickets: s.tickets === null || s.tickets === undefined ? NaN : Number(s.tickets),
       scouted: !!s.scouted,
@@ -849,7 +874,7 @@ function regionStats(r){
   }
   return {
     done: legTowards(r.lake) >= r.leg,
-    multOk: p.mult >= r.mult, kgOk: num(p.kg) >= r.kg, legOk: legTowards(r.lake) >= r.leg,
+    multOk: multRun(r.lake) >= r.mult, kgOk: num(p.kg) >= r.kg, legOk: legTowards(r.lake) >= r.leg,
   };
 }
 const regionFor = lake => METHOD.find(r => r.lake === lake);
@@ -1194,9 +1219,10 @@ function syncRegionCard(card, r){
 
   const multUp = card.querySelector('[data-f="mult+"]');
   if(multUp){
-    steps[0].querySelector('.stepper .c').textContent = p.mult + '/' + r.mult;
-    card.querySelector('[data-f="mult-"]').disabled = p.mult <= 0;
-    multUp.disabled = p.mult >= r.mult;
+    const mr = multRun(r.lake);
+    steps[0].querySelector('.stepper .c').textContent = mr + '/' + r.mult;
+    card.querySelector('[data-f="mult-"]').disabled = mr <= 0;
+    multUp.disabled = mr >= r.mult;
   }
   const dragDown = card.querySelector('[data-f="dragon-"]');
   if(dragDown){
@@ -1255,14 +1281,15 @@ function renderMethod(){
             (p.scouted ? 'Done' : 'Mark') + '</button></span></div>' +
         dragonRow(r, dragonCredit(r.lake));
     }else{
-      const lc = legTowards(r.lake), dc = dragonCredit(r.lake);
+      const lc = legTowards(r.lake), dc = dragonCredit(r.lake), mr = multRun(r.lake);
       steps =
         '<div class="step' + (st.multOk ? ' ok' : '') + '">' + (st.multOk ? TICK : RING) +
-          '<span class="sl">Run <b>' + r.multWord + '</b> 10× multipliers</span>' +
+          '<span class="sl">Run <b>' + r.multWord + '</b> 10× multipliers' +
+            '<span class="manual" style="border:0;padding:0;margin-left:6px">auto</span></span>' +
           '<span class="sc"><span class="stepper">' +
-            '<button type="button" data-f="mult-" aria-label="One fewer multiplier"' + (p.mult <= 0 ? ' disabled' : '') + '>−</button>' +
-            '<span class="c">' + p.mult + '/' + r.mult + '</span>' +
-            '<button type="button" data-f="mult+" aria-label="One more multiplier"' + (p.mult >= r.mult ? ' disabled' : '') + '>+</button>' +
+            '<button type="button" data-f="mult-" aria-label="One fewer multiplier"' + (mr <= 0 ? ' disabled' : '') + '>−</button>' +
+            '<span class="c">' + mr + '/' + r.mult + '</span>' +
+            '<button type="button" data-f="mult+" aria-label="One more multiplier"' + (mr >= r.mult ? ' disabled' : '') + '>+</button>' +
           '</span></span></div>' +
         '<div class="step' + (st.kgOk ? ' ok' : '') + '">' + (st.kgOk ? TICK : RING) +
           '<span class="sl">Run 1× to <b>' + r.kg + '+</b> kg</span><span class="manual">manual</span>' +
@@ -1297,8 +1324,10 @@ function renderMethod(){
         });
       }else{
         el.addEventListener('click', () => {
-          if(f === 'mult+') methodProgress[r.lake].mult = Math.min(r.mult, p.mult + 1);
-          else if(f === 'mult-') methodProgress[r.lake].mult = Math.max(0, p.mult - 1);
+          /* the stepper nudges the correction, not the count: the buttons are
+             disabled at the bounds, so a bare ±1 keeps multRun inside 0..target */
+          if(f === 'mult+') methodProgress[r.lake].multAdj = (p.multAdj || 0) + 1;
+          else if(f === 'mult-') methodProgress[r.lake].multAdj = (p.multAdj || 0) - 1;
           else if(f === 'dragon+') methodProgress[r.lake].dragon = (p.dragon || 0) + 1;
           else if(f === 'dragon-') methodProgress[r.lake].dragon = Math.max(0, (p.dragon || 0) - 1);
           else if(f === 'scouted') methodProgress[r.lake].scouted = !p.scouted;
