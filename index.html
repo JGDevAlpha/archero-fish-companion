@@ -498,6 +498,36 @@ input[type=number]::placeholder{color:var(--ink-dim);font-size:.66rem;letter-spa
     <button class="btn btn-dragon" id="dragonBtn"></button>
   </div>
 
+  <!-- Broken lines sits directly under the fishing controls on purpose. In a
+       windowed setup the viewport is short, and the two things tapped over and
+       over are a fish plate and +1 break -- putting the readout between them
+       pushed break off screen. The readout is read occasionally, so it follows. -->
+  <div class="panel meter">
+    <div class="top">
+      <span class="lbl">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>
+        Broken lines
+      </span>
+      <span class="val" id="thrV">0<span>/120</span></span>
+    </div>
+    <div class="track"><div id="thrFill" style="width:0%"></div></div>
+    <div class="acts">
+      <button class="btn" id="thrAdd">+1 break</button>
+      <button class="btn" id="thrReset">Reset</button>
+    </div>
+  </div>
+
+  <div class="rowbtns">
+    <button class="btn btn-primary" id="refillBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 12c0-3 3.5-5.5 7-5.5 3 0 5.5 2 7 5.5-1.5 3.5-4 5.5-7 5.5-3.5 0-7-2.5-7-5.5Z"/><path d="M2 9.5 6.5 12 2 14.5"/><path d="M16.5 11.5v.01"/></svg>
+      Refill lake
+    </button>
+    <button class="btn" id="undoBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-4"/></svg>
+      Undo
+    </button>
+  </div>
+
   <div class="panel readout">
     <div class="big">
       <div class="col">
@@ -512,32 +542,6 @@ input[type=number]::placeholder{color:var(--ink-dim);font-size:.66rem;letter-spa
     <div class="gauge"><div class="fill" id="gFill"></div><div class="base"></div></div>
     <div class="gaugefoot"><span>0%</span><span id="gNote">at baseline</span><span>10%+</span></div>
     <div class="advice" id="advice" aria-live="polite"></div>
-  </div>
-
-  <div class="rowbtns">
-    <button class="btn btn-primary" id="refillBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 12c0-3 3.5-5.5 7-5.5 3 0 5.5 2 7 5.5-1.5 3.5-4 5.5-7 5.5-3.5 0-7-2.5-7-5.5Z"/><path d="M2 9.5 6.5 12 2 14.5"/><path d="M16.5 11.5v.01"/></svg>
-      Refill lake
-    </button>
-    <button class="btn" id="undoBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-4"/></svg>
-      Undo
-    </button>
-  </div>
-
-  <div class="panel meter">
-    <div class="top">
-      <span class="lbl">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>
-        Broken lines
-      </span>
-      <span class="val" id="thrV">0<span>/120</span></span>
-    </div>
-    <div class="track"><div id="thrFill" style="width:0%"></div></div>
-    <div class="acts">
-      <button class="btn" id="thrAdd">+1 break</button>
-      <button class="btn" id="thrReset">Reset</button>
-    </div>
   </div>
 
   <div class="panel tot">
@@ -561,7 +565,11 @@ input[type=number]::placeholder{color:var(--ink-dim);font-size:.66rem;letter-spa
 
   <p class="foot">
     <span id="saveNote">Progress is saved in this browser only.</span><br>
-    Companion clone of <a href="https://ksun4176.github.io/archero2-fish-companion/" target="_blank" rel="noopener">ksun4176/archero2-fish-companion</a> · <a href="https://ko-fi.com/O4O71FBM0I" target="_blank" rel="noopener">support the original author</a>
+    Companion clone of <a href="https://ksun4176.github.io/archero2-fish-companion/" target="_blank" rel="noopener">ksun4176/archero2-fish-companion</a> · <a href="https://ko-fi.com/O4O71FBM0I" target="_blank" rel="noopener">support the original author</a><br>
+    <!-- Geist and Geist Mono ship inlined as woff2 data URIs. OFL-1.1 requires the
+         copyright notice and licence to travel with the fonts, so it belongs on the
+         page itself and not only in the repository README. -->
+    Geist &amp; Geist Mono © <a href="https://vercel.com/font" target="_blank" rel="noopener">Vercel</a>, licensed under the <a href="https://openfontlicense.org/open-font-license-official-text/" target="_blank" rel="noopener">SIL Open Font License 1.1</a> · fish art from Archero 2, © Habby
   </p>
 </div>
 
