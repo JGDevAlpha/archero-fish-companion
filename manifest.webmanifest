@@ -1,0 +1,19 @@
+{
+  "name": "Fishing Companion — Archero 2",
+  "short_name": "Fishing",
+  "description": "Pool tracking, legendary odds, break-line advice and the region method plan for the Archero 2 Angler's Bounty event.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E9F1F3",
+  "theme_color": "#E9F1F3",
+  "icons": [
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
