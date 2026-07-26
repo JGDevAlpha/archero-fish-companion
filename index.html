@@ -329,17 +329,19 @@ details.row .brk div span:last-child{margin-left:auto;font-weight:600;color:var(
 .mrow .hint{margin-left:auto;font-size:.7rem;color:var(--ink-dim);white-space:nowrap}
 .mrow .chev{width:14px;height:14px;color:var(--ink-dim);flex:none}
 .hintline{font-size:.68rem;line-height:1.45;color:var(--ink-dim)}
-#bkBox{
-  font:inherit;font-size:.68rem;width:100%;resize:vertical;
-  background:var(--sunk);color:var(--ink);border:1px solid var(--line);
-  border-radius:var(--r-sm);padding:8px 9px;word-break:break-all;
+/* multiplier selector: the batch size you are running */
+.mults{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.mults button{
+  font:inherit;font-weight:600;font-size:.78rem;
+  background:var(--raised);color:var(--ink-mid);border:1px solid var(--line);
+  border-radius:var(--r-sm);padding:8px 0;cursor:pointer;box-shadow:var(--bezel);
+  transition:background .15s, border-color .15s, color .15s;
 }
-#bkBox::placeholder{color:var(--ink-dim)}
-#bkMsg.ok{color:var(--good)} #bkMsg.bad{color:var(--bad)}
-#bkAdv summary{cursor:pointer;padding:4px 0;list-style:none}
-#bkAdv summary::-webkit-details-marker{display:none}
-#bkAdv summary::before{content:"▸ ";color:var(--ink-dim)}
-#bkAdv[open] summary::before{content:"▾ "}
+.mults button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.mults button:hover[aria-pressed="false"]{border-color:var(--accent)}
+.drawline{display:flex;align-items:center;gap:8px;font-size:.68rem;color:var(--ink-dim)}
+.drawline .track{flex:1}
+.drawline b{color:var(--ink);font-weight:600}
 
 /* ---------- quests ---------- */
 @media (min-width:760px){#questSheet .body,#methodSheet .body{grid-template-columns:1fr 1fr}}
@@ -432,8 +434,8 @@ input[type=number]::placeholder{color:var(--ink-dim);font-size:.66rem;letter-spa
       <li>Tap a fish to log a catch — the pool shrinks and the odds update.</li>
       <li>The band under the gauge tells you whether to break a line now or thin the pool first.</li>
       <li>Legendary catches feed the method tracker automatically; you get a nudge when a region's goal lands.</li>
-      <li>10× multipliers count themselves from your catches — ten fish is one multiplier, so emptying the pool is four. Use the ± if you ran 1× casts, which land fish without being a multiplier.</li>
-      <li>Weight is the one thing the app can't read, so those rows stay manual.</li>
+      <li>Pick the multiplier you're running before you log a draw. The batch closes at that many fish and is recorded as one draw of that size, so the plan's 10× count is exact — 1× and 2× casts never inflate it. Switching mid-draw retargets the open batch instead of losing it.</li>
+      <li>Weight stays manual: each fish weighs something different, so there is nothing to read it from.</li>
       <li>A Dragon Gate is a random extra region. Tap the amber button to fish it; a legendary you pull there counts toward the region you were working, and Undo takes it back.</li>
       <li>Track broken lines against the 120 cap.</li>
     </ul>
@@ -448,6 +450,9 @@ input[type=number]::placeholder{color:var(--ink-dim);font-size:.66rem;letter-spa
   </div>
 
   <div style="display:flex;flex-direction:column;gap:8px">
+    <div class="lbl">Multiplier running</div>
+    <div class="mults" id="mults" role="group" aria-label="Draw multiplier"></div>
+    <div class="drawline" id="drawLine" aria-live="polite"></div>
     <div class="plates" id="plates"></div>
     <button class="btn" id="poolBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 16s2-6 7-6 5 4 9 4 4-3 4-3"/><path d="M18 8.5V8"/></svg>
@@ -569,25 +574,6 @@ input[type=number]::placeholder{color:var(--ink-dim);font-size:.66rem;letter-spa
         <button type="button" data-theme-val="dark">Dark</button>
       </div>
     </div>
-    <div class="mgroup">
-      <span class="lbl">Backup</span>
-      <span class="hintline" id="bkWhy"></span>
-      <div class="rowbtns">
-        <button class="btn" id="bkSave">Save file</button>
-        <button class="btn" id="bkLoad">Load file</button>
-      </div>
-      <input type="file" id="bkFile" accept=".json,application/json,text/plain" hidden>
-      <details id="bkAdv">
-        <summary class="hintline">Or use a code</summary>
-        <textarea id="bkBox" rows="3" spellcheck="false"
-          placeholder="Paste a backup code here, then Restore" aria-label="Backup code"></textarea>
-        <div class="rowbtns" style="margin-top:7px">
-          <button class="btn" id="bkShow">Show code</button>
-          <button class="btn" id="bkRestore">Restore</button>
-        </div>
-      </details>
-      <span class="hintline" id="bkMsg"></span>
-    </div>
     <div class="mgroup" id="resetArea"></div>
   </div>
 </div>
@@ -640,8 +626,13 @@ const TIER_VAR   = {SR:'--rare',MR:'--rare',LR:'--rare',SE:'--epic',LE:'--epic',
 const SHARE      = {SR:.375,MR:.25,LR:.125,SE:.15,LE:.075,LEG:.025};
 const BASELINE   = .025;
 const MAX_LINES  = 120;
-/* fish landed by one 10× multiplier draw */
-const MULT_FISH  = 10;
+/* Selectable draw multipliers. The batch size *is* the multiplier, so picking one
+   and logging that many fish records exactly which draw was run -- there is no way
+   to infer that from a running total, because a 1× cast and a tenth of a 10×
+   multiplier both look like one fish. */
+const MULTS      = [1, 2, 5, 10];
+/* only 10× draws satisfy the region plan's multiplier step */
+const PLAN_MULT  = 10;
 const SETS       = ['1','2','3','4'];
 const DRAGON_LAKE = 'Dragon';
 
@@ -679,14 +670,24 @@ const METHOD = [
   {n:4, lake:'Polar',     tickets:16, ticketGate:14, kg:1841},
 ];
 
+const blankRuns = () => Object.fromEntries(MULTS.map(m => [m, 0]));
+const blankLake = lake => ({
+  fishCounts:fullPool(lake), actionStack:[],
+  /* the draw in progress: `size` fish to fill, `n` logged so far. size 0 = none */
+  draw:{size:0, n:0},
+  /* completed draws by multiplier */
+  runs:blankRuns(),
+});
+
 let state = {
   currentLake:'Lakehouse',
+  multSel:PLAN_MULT,
   /* Dragon Gate is a random event inside a region, not a step of its own, so a
      dragon catch is credited to the region you were working when it appeared. */
   lastRegion:'Lakehouse',
   numThreads:0,
   fishSet:'1',
-  lakes: Object.fromEntries(LAKES.map(l => [l,{fishCounts:fullPool(l), actionStack:[]}])),
+  lakes: Object.fromEntries(LAKES.map(l => [l, blankLake(l)])),
   totals:Object.fromEntries(LAKES.map(l => [l,{fishCounts:blankPool()}])),
 };
 let questProgress = Object.fromEntries(QUESTS.map(q => [q.name, NaN]));
@@ -694,20 +695,41 @@ const blankMethod = () => Object.fromEntries(METHOD.map(r => [r.lake,{multAdj:0,
 let methodProgress = blankMethod();
 let themePref = 'auto';
 
-/* ---------------- 10× multipliers ----------------
-   How many multipliers have been run is a fact about the catch log rather than
-   something to tally by hand: one draw lands ten fish, so emptying a 40-fish pool
-   is four of them and ten individual taps is one. Deriving it also means Undo
-   takes a multiplier back for free, which a hand-kept counter never did.
+/* ---------------- draw ledger ----------------
+   You pick the multiplier you are running, then log the fish it landed; the batch
+   closes at that many and is recorded as one draw of that size. So the count is
+   observed rather than inferred, which is the only way to tell a 1× cast from a
+   tenth of a 10× multiplier -- both are one fish.
 
-   multAdj is the correction for draws the log cannot see. It is signed on
-   purpose: the plan also has you run 1× casts for the weight step, and ten of
-   those land ten fish that were not a multiplier, so the count needs to come
-   down as well as up. Defined here, above the persistence layer, because
-   applyMethod migrates old records against it. */
-const caughtIn  = lake => TYPES.reduce((s,t) => s + state.totals[lake].fishCounts[t], 0);
-const multBase  = lake => Math.floor(caughtIn(lake) / MULT_FISH);
-const multRun   = lake => Math.max(0, multBase(lake) + (methodProgress[lake]?.multAdj || 0));
+   A draw that is still filling counts for nothing until it closes, and Undo
+   reopens it. multAdj stays as the correction path for a draw run away from the
+   app. Defined above the persistence layer because applyTracker migrates against
+   it. */
+const caughtIn = lake => TYPES.reduce((s,t) => s + state.totals[lake].fishCounts[t], 0);
+const runsOf   = (lake,m) => state.lakes[lake]?.runs?.[m] || 0;
+const multRun  = lake => Math.max(0, runsOf(lake, PLAN_MULT) + (methodProgress[lake]?.multAdj || 0));
+
+/* Log `fish` fish against the ledger, closing every batch they complete. Returns
+   what changed, so an Undo can put it back exactly. */
+function fillDraw(lake, fish){
+  const L = state.lakes[lake];
+  const before = {size:L.draw?.size || 0, n:L.draw?.n || 0};
+  const closed = [];
+  let size = before.size || state.multSel, n = before.n;
+  for(let i = 0; i < fish; i++){
+    n += 1;
+    if(n >= size){ closed.push(size); n = 0; size = state.multSel; }
+  }
+  closed.forEach(m => { L.runs[m] = (L.runs[m] || 0) + 1; });
+  L.draw = {size: n ? size : 0, n};
+  return {before, closed};
+}
+function unfillDraw(lake, rec){
+  if(!rec) return;
+  const L = state.lakes[lake];
+  (rec.closed || []).forEach(m => { L.runs[m] = Math.max(0, (L.runs[m] || 0) - 1); });
+  L.draw = {size:rec.before?.size || 0, n:rec.before?.n || 0};
+}
 
 /* ---------------- persistence ----------------
    Storage can be unavailable outright: Safari private mode throws on write, and
@@ -720,21 +742,28 @@ const store = {
   set(k, v){ try{ localStorage.setItem(k, v); return true; }catch{ storageOK = false; return false; } },
 };
 
-/* Split into per-section appliers so a pasted backup reuses exactly the same
-   validation as a normal load. */
+/* Split into per-section appliers, so each saved key is validated in one place
+   and a partly-written record cannot take a path of its own. */
 function applyTracker(d){
   if(!d) return;
   if(d.currentLake && LAKES.includes(d.currentLake)) state.currentLake = d.currentLake;
   if(d.lastRegion && regionFor(d.lastRegion)) state.lastRegion = d.lastRegion;
   if(typeof d.numThreads === 'number') state.numThreads = Math.min(MAX_LINES, Math.max(0, d.numThreads));
+  if(MULTS.includes(Number(d.multSel))) state.multSel = Number(d.multSel);
   LAKES.forEach(l => {
     const s = d.lakesData?.[l];
     if(s?.fishCounts) state.lakes[l] = {
       fishCounts:{...fullPool(l), ...s.fishCounts},
       actionStack:Array.isArray(s.actionStack) ? s.actionStack : [],
+      draw:{size:Number(s.draw?.size) || 0, n:Number(s.draw?.n) || 0},
+      runs:{...blankRuns(), ...(s.runs || {})},
     };
     const t = d.totalData?.[l];
     if(t?.fishCounts) state.totals[l] = {fishCounts:{...blankPool(), ...t.fishCounts}};
+    /* Before draws were recorded, the 10× count was inferred as
+       floor(fish caught / 10). Seed the ledger with that so nobody's progress
+       resets; totals are in place above, so it measures the same thing it did. */
+    if(s && !s.runs) state.lakes[l].runs[PLAN_MULT] = Math.floor(caughtIn(l) / PLAN_MULT);
   });
 }
 /* Upstream discarded a saved set whose timestamp predated a hardcoded cutoff, to
@@ -795,40 +824,10 @@ function load(){
   applyTheme(store.get('themePref'));
 }
 
-/* ---------------- backup ----------------
-   There is no persistent-storage capability for Artifacts, and some mobile
-   browsers drop partitioned localStorage when the page closes. So make the whole
-   state exportable, and restorable from a pasted code. */
-const BACKUP_V = 1;
-function snapshot(){
-  return JSON.stringify({
-    v: BACKUP_V,
-    tracker:{
-      currentLake:state.currentLake, lastRegion:state.lastRegion,
-      numThreads:state.numThreads, lakesData:state.lakes, totalData:state.totals,
-    },
-    fishSet: state.fishSet,
-    quests: questProgress,
-    method: methodProgress,
-    theme: themePref,
-  });
-}
-function restoreFrom(text){
-  const d = JSON.parse(String(text).trim());
-  if(!d || typeof d !== 'object') throw new Error('not a backup');
-  if(d.v !== BACKUP_V) throw new Error('backup version ' + d.v + ' is not supported');
-  applyTracker(d.tracker);
-  applyFishSet(d.fishSet);
-  applyQuests(d.quests);
-  applyMethod(d.method);
-  applyTheme(d.theme);
-  save(); saveMethodNow(); store.set('questProgress', JSON.stringify({questProgress}));
-  applyTheme(themePref);
-}
 function save(){
   store.set('fishingTracker', JSON.stringify({
     currentLake:state.currentLake, lastRegion:state.lastRegion, numThreads:state.numThreads,
-    lakesData:state.lakes, totalData:state.totals,
+    multSel:state.multSel, lakesData:state.lakes, totalData:state.totals,
   }));
   store.set('fishingTrackerFishSet', JSON.stringify({ fishSet:state.fishSet }));
 }
@@ -919,10 +918,10 @@ function catchFish(t){
   const c = state.lakes[lake].fishCounts;
   if(c[t] <= 0) return;
   c[t] -= 1;
-  let entry = t;
+  let entry = {t, draw:fillDraw(lake, 1)};
   if(lake === DRAGON_LAKE && t === 'LEG'){
     const credit = creditDragon(1);
-    if(credit) entry = {t, credit};
+    if(credit) entry = {...entry, credit};
   }
   state.lakes[lake].actionStack.push(entry);
   state.totals[lake].fishCounts[t] += 1;
@@ -935,18 +934,21 @@ function catchPool(){
   if(state.lakes[lake].actionStack.length > 0) return;
   const pool = fullPool(lake);
   TYPES.forEach(t => state.totals[lake].fishCounts[t] += pool[t]);
-  let entry = 'ALL';
+  /* a whole pool is however many draws of the selected multiplier fit in it */
+  let entry = {t:'ALL', draw:fillDraw(lake, totalFor(lake))};
   if(lake === DRAGON_LAKE){
     const credit = creditDragon(pool.LEG);
-    if(credit) entry = {t:'ALL', credit, legs:pool.LEG};
+    if(credit) entry = {...entry, credit, legs:pool.LEG};
   }
-  state.lakes[lake] = {fishCounts:blankPool(), actionStack:[entry]};
+  const L = state.lakes[lake];
+  state.lakes[lake] = {...L, fishCounts:blankPool(), actionStack:[entry]};
   commit();
 }
 function refill(){
   const lake = state.currentLake;
   if(remaining(lake) > 0) return;
-  state.lakes[lake] = {fishCounts:fullPool(lake), actionStack:[]};
+  /* a refill is a new pool, not a new plan: the draw ledger carries over */
+  state.lakes[lake] = {...state.lakes[lake], fishCounts:fullPool(lake), actionStack:[]};
   commit();
 }
 function undo(){
@@ -964,17 +966,18 @@ function undo(){
   if(entry.t === 'ALL'){
     const pool = fullPool(lake);
     TYPES.forEach(t => state.totals[lake].fishCounts[t] -= pool[t]);
-    state.lakes[lake] = {fishCounts:pool, actionStack:[]};
+    state.lakes[lake] = {...state.lakes[lake], fishCounts:pool, actionStack:[]};
     back(entry.legs || 0);
   }else{
     state.lakes[lake].fishCounts[entry.t] += 1;
     state.totals[lake].fishCounts[entry.t] -= 1;
     back(1);
   }
+  unfillDraw(lake, entry.draw);
   commit();
 }
 function resetAll(){
-  state.lakes  = Object.fromEntries(LAKES.map(l => [l,{fishCounts:fullPool(l), actionStack:[]}]));
+  state.lakes  = Object.fromEntries(LAKES.map(l => [l, blankLake(l)]));
   state.totals = Object.fromEntries(LAKES.map(l => [l,{fishCounts:blankPool()}]));
   state.numThreads = 0;
   confirming = false;
@@ -1011,6 +1014,41 @@ function renderZones(){
 }
 
 const PH_SVG = '<svg class="ph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-5 8-5 8 5 8 5-3.5 5-8 5-8-5-8-5Z"/><path d="M18 9.5 22 7v10l-4-2.5"/><path d="M7.5 11h.01"/></svg>';
+
+/* The selector is what makes the count exact, so it is the first thing on the
+   screen above the plates. Switching it mid-draw retargets the open batch rather
+   than throwing the fish away; if enough are already logged it closes at once. */
+function renderMults(){
+  const host = $('mults');
+  host.innerHTML = '';
+  MULTS.forEach(m => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = m + '×';
+    b.setAttribute('aria-pressed', String(m === state.multSel));
+    b.setAttribute('aria-label', 'Run ' + m + '× draws');
+    b.addEventListener('click', () => {
+      state.multSel = m;
+      const L = state.lakes[state.currentLake];
+      if(L.draw.size){
+        L.draw.size = m;
+        if(L.draw.n >= m){ L.runs[m] = (L.runs[m] || 0) + 1; L.draw = {size:0, n:0}; }
+      }
+      commit();
+    });
+    host.appendChild(b);
+  });
+}
+function renderDraw(){
+  const L = state.lakes[state.currentLake];
+  const n = L.draw.size ? L.draw.n : 0, size = L.draw.size || state.multSel;
+  const done = runsOf(state.currentLake, state.multSel);
+  $('drawLine').innerHTML = size === 1
+    ? '<span><b>' + done + '</b> single cast' + (done === 1 ? '' : 's') + ' logged here</span>'
+    : '<span>This draw <b>' + n + '</b>/' + size + '</span>' +
+      '<span class="track"><div style="width:' + (n / size * 100) + '%;background:var(--accent)"></div></span>' +
+      '<span><b>' + done + '</b> done</span>';
+}
 
 function renderPlates(){
   const host = $('plates');
@@ -1061,10 +1099,6 @@ function renderReadout(){
     ? 'Progress is saved in this browser only.'
     : 'This browser blocks storage, so progress will not survive a reload — the session still works.';
   note.style.color = storageOK ? '' : 'var(--legend)';
-  $('bkSave').hidden = !(window.claude && window.claude.downloads);
-  $('bkWhy').textContent = storageOK
-    ? 'Progress lives in this browser only. Save a backup before clearing site data or switching device.'
-    : 'This browser is not keeping data between visits, so back up if you want to keep progress.';
 
   const credit = state.lastRegion, cr = regionFor(credit);
   const inDragon = state.currentLake === DRAGON_LAKE;
@@ -1244,7 +1278,7 @@ function syncMethodCards(){
 
 /* Everything except the two sheets that own text inputs. */
 function renderMain(){
-  renderZones(); renderPlates(); renderReadout();
+  renderZones(); renderMults(); renderDraw(); renderPlates(); renderReadout();
   renderMeter(); renderTotals(); renderMenu();
 }
 
@@ -1427,7 +1461,7 @@ function checkGoals(){
 }
 
 function render(){
-  renderZones(); renderPlates(); renderReadout();
+  renderZones(); renderMults(); renderDraw(); renderPlates(); renderReadout();
   renderMeter(); renderTotals(); renderQuests(); renderMethod(); renderMenu();
   checkGoals();
 }
@@ -1475,66 +1509,6 @@ $('qClear').addEventListener('click', () => {
 $('mClear').addEventListener('click', () => {
   methodProgress = blankMethod();
   saveMethodNow(); render();
-});
-
-/* backup: the only durable route, since Artifacts get no persistent-storage
-   capability and mobile browsers may drop partitioned localStorage on close */
-const bkMsg = (text, kind) => { const el = $('bkMsg'); el.textContent = text; el.className = 'hintline ' + (kind || ''); };
-
-$('bkSave').addEventListener('click', async () => {
-  const dl = window.claude && window.claude.downloads;
-  if(!dl){ $('bkBox').value = snapshot(); bkMsg('Saving files is unavailable here — copy the code above instead.', 'bad'); return; }
-  try{
-    await dl.save({filename:'fishing-companion-backup.json', data:snapshot()});
-    bkMsg('Backup saved.', 'ok');
-  }catch(e){
-    const code = e && e.code;
-    if(code === 'declined')          bkMsg('Save cancelled.');
-    else if(code === 'rate_limited') bkMsg('A save prompt is already open — try again shortly.');
-    else { $('bkBox').value = snapshot(); bkMsg('Could not save a file — copy the code above instead.', 'bad'); }
-  }
-});
-
-$('bkShow').addEventListener('click', async () => {
-  const code = snapshot();
-  $('bkBox').value = code;
-  $('bkBox').select();
-  try{
-    await navigator.clipboard.writeText(code);
-    bkMsg('Code copied. Keep it somewhere safe.', 'ok');
-  }catch{
-    bkMsg('Select the text above and copy it.', '');
-  }
-});
-
-$('bkLoad').addEventListener('click', () => $('bkFile').click());
-$('bkFile').addEventListener('change', e => {
-  const file = e.target.files && e.target.files[0];
-  if(!file) return;
-  const fr = new FileReader();
-  fr.onload = () => {
-    try{
-      restoreFrom(fr.result);
-      applyTheme(themePref); render();
-      bkMsg('Restored from ' + file.name + '.', 'ok');
-    }catch(err){ bkMsg('That file could not be read: ' + err.message, 'bad'); }
-  };
-  fr.onerror = () => bkMsg('Could not read that file.', 'bad');
-  fr.readAsText(file);
-  e.target.value = '';
-});
-
-$('bkRestore').addEventListener('click', () => {
-  const text = $('bkBox').value.trim();
-  if(!text){ bkMsg('Paste a backup code first.', 'bad'); return; }
-  try{
-    restoreFrom(text);
-    applyTheme(themePref);
-    render();
-    bkMsg('Restored.', 'ok');
-  }catch(e){
-    bkMsg('That code could not be read: ' + e.message, 'bad');
-  }
 });
 
 /* theme */
