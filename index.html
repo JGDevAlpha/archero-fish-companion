@@ -433,6 +433,9 @@ input[type=number]::placeholder{color:var(--ink-dim);font-size:.66rem;letter-spa
 .step .sc{margin-left:auto;display:flex;align-items:center;gap:5px;flex:none}
 .step input[type=number]{width:5.2em;padding:5px 7px;font-size:.75rem;text-align:right}
 .step .unit{font-size:.68rem;color:var(--ink-dim)}
+.step .weightmeta{display:block;margin-top:2px;font-size:.61rem;color:var(--ink-dim);font-weight:500}
+.step.ok .weightmeta{color:color-mix(in oklch,var(--good) 72%,var(--ink-dim))}
+.weight-est{font-size:.76rem;font-weight:600;white-space:nowrap}
 .stepper{display:flex;align-items:center;gap:4px}
 .stepper button{
   font:inherit;width:24px;height:24px;border-radius:6px;cursor:pointer;line-height:1;
@@ -470,9 +473,9 @@ input[type=number]::placeholder{color:var(--ink-dim);font-size:.66rem;letter-spa
       <li><b>The band under the gauge</b> tells you whether to break a line now or thin the pool first — odds are legendary ÷ fish left, so thinning is cheaper than spending lines at the 2.5% baseline.</li>
       <li><b>Two directives.</b> The method tracker carries both published plans — Option 1 maximises gold tickets for +2 runes on a smaller gem budget, Option 2 maximises silver tickets for +3. Switch at the top of the tracker; only the targets move, never your progress.</li>
       <li><b>Most of the tracker fills itself.</b> Legendary catches, 10× draws and golden fish are all counted from what you log, and each ± is there to correct a count, not to keep it. Golden fish are accumulative across every pool, the event pool included.</li>
-      <li><b>Weight stays manual</b> — every fish weighs something different, so there is nothing to read it from. Those rows are marked <i>manual</i> and never gate a region.</li>
+      <li><b>Weight is estimated automatically</b> from lures used and the measured Quick Fishing average for that lake. Dragon Gate and Fullmoon lures use the average of the lake where the gate appeared. It is an estimate, so weight still does not gate a region.</li>
       <li><b>Goals announce themselves</b> and then get out of the way. Finishing a step notifies, not just finishing a region; several at once queue rather than overwrite.</li>
-      <li><b>The event pool is a random extra region</b>, not a step in the plan. Tap the amber button to fish it; a legendary you pull there credits the region you were working, and Undo takes both back. The game runs one event pool per rotation, so pick <b>Dragon Gate</b> or <b>Fullmoon</b> in the menu — each keeps its own catches, and the credit counts either way.</li>
+      <li><b>The event pool is a random extra region</b>, not a step in the plan. Tap the amber button to fish it; every lure is credited to the region where the gate appeared for weight/ticket estimates, while legendary catches also count toward that region's legendary target. Undo reverses both. Dragon Gate and Fullmoon share this behaviour and keep their own catch logs.</li>
       <li><b>Broken lines</b> track against the 120 cap.</li>
       <li>Progress saves itself in this browser. There is no backup — add the page to your Home Screen and it behaves like an app.</li>
     </ul>
@@ -692,6 +695,16 @@ const MAX_LINES  = 120;
 const MULTS      = [1, 2, 5, 10];
 /* only 10× draws satisfy the region plan's multiplier step */
 const PLAN_MULT  = 10;
+/* Quick Fishing measured averages per lure. Event pools do not have their own
+   economy: Dragon Gate / Fullmoon use the rate of the region where the gate
+   appeared (known gate regions are lakes 2-4), so event lures are credited back
+   to that host region before weight/ticket estimates are calculated. */
+const QUICK_FISHING = {
+  Lakehouse:{silverPerLure:80,  kgPerLure:.968},
+  Sunset:   {silverPerLure:127, kgPerLure:1.53},
+  Oceanic:  {silverPerLure:196, kgPerLure:2.36},
+  Polar:    {silverPerLure:391, kgPerLure:4.69},
+};
 const SETS       = ['1','2','3','4'];
 
 /* named fish, where known (Set 4 = Angler's Bounty Aquatlas) */
@@ -791,7 +804,10 @@ let state = {
   totals:Object.fromEntries(LAKES.map(l => [l,{fishCounts:blankPool()}])),
 };
 let questProgress = Object.fromEntries(QUESTS.map(q => [q.name, NaN]));
-const blankMethod = () => Object.fromEntries(METHOD.map(r => [r.lake,{multAdj:0,goldAdj:0,kg:NaN,tickets:NaN,scouted:false,dragon:0}]));
+const blankMethod = () => Object.fromEntries(METHOD.map(r => [r.lake,{
+  multAdj:0,goldAdj:0,tickets:NaN,scouted:false,dragon:0,
+  eventLures:0,weightBaseKg:0,weightBaseLures:0,
+}]));
 let methodProgress = blankMethod();
 let themePref = 'auto';
 
@@ -808,6 +824,21 @@ let themePref = 'auto';
 const caughtIn = lake => TYPES.reduce((s,t) => s + state.totals[lake].fishCounts[t], 0);
 const runsOf   = (lake,m) => state.lakes[lake]?.runs?.[m] || 0;
 const multRun  = lake => Math.max(0, runsOf(lake, PLAN_MULT) + (methodProgress[lake]?.multAdj || 0));
+const eventLuresFor = lake => Math.max(0, Number(methodProgress[lake]?.eventLures) || 0);
+const luresTowards = lake => caughtIn(lake) + eventLuresFor(lake);
+const quickStat = lake => QUICK_FISHING[lake] || null;
+function estimatedWeight(lake){
+  const stat = quickStat(lake), p = methodProgress[lake];
+  if(!stat || !p) return 0;
+  const baseKg = Math.max(0, Number(p.weightBaseKg) || 0);
+  const baseLures = Math.max(0, Number(p.weightBaseLures) || 0);
+  return baseKg + Math.max(0, luresTowards(lake) - baseLures) * stat.kgPerLure;
+}
+const estimatedSilver = lake => {
+  const stat = quickStat(lake);
+  return stat ? Math.round(luresTowards(lake) * stat.silverPerLure) : 0;
+};
+const fmtKg = v => (Math.round(Math.max(0,v) * 10) / 10).toLocaleString('en-US', {maximumFractionDigits:1});
 
 /* Log `fish` fish against the ledger, closing every batch they complete. Returns
    what changed, so an Undo can put it back exactly. */
@@ -910,12 +941,22 @@ function applyMethod(d){
       ? Number(s.goldAdj) || 0
       : (r.lake === 'Polar' && s.tickets !== null && s.tickets !== undefined
          ? Math.max(0, (Number(s.tickets) || 0) - goldCaught()) : 0);
+    const legacyKg = s.kg === null || s.kg === undefined ? NaN : Number(s.kg);
+    const hasLegacyKg = Number.isFinite(legacyKg) && legacyKg > 0;
     methodProgress[r.lake] = {
       multAdj, goldAdj,
-      kg: s.kg === null || s.kg === undefined ? NaN : Number(s.kg),
       tickets: s.tickets === null || s.tickets === undefined ? NaN : Number(s.tickets),
       scouted: !!s.scouted,
       dragon: Math.max(0, Number(s.dragon) || 0),
+      eventLures: Math.max(0, Number(s.eventLures) || 0),
+      /* First run after this upgrade: preserve a manually entered kg value as the
+         starting point and only auto-add lures logged from that point forward. */
+      weightBaseKg: s.weightBaseKg !== undefined
+        ? Math.max(0, Number(s.weightBaseKg) || 0)
+        : (hasLegacyKg ? legacyKg : 0),
+      weightBaseLures: s.weightBaseLures !== undefined
+        ? Math.max(0, Number(s.weightBaseLures) || 0)
+        : (hasLegacyKg ? caughtIn(r.lake) : 0),
     };
   });
 }
@@ -995,11 +1036,11 @@ function questStats(q, progress){
 const num = v => Number.isNaN(v) || v === null || v === undefined ? 0 : v;
 
 /* A region counts as met on the goal the app can actually verify: legendary
-   caught (regions 1-3) or golden fish (region 4). Weight is unverifiable, so
-   it is shown as a manual reference and never gates completion. */
+   caught (regions 1-3) or golden fish (region 4). Weight is an average-based
+   estimate from lures, so it gets an automatic step tick but never gates region
+   completion. */
 function regionStats(r){
-  const p = methodProgress[r.lake];
-  const kgOk = r.kg === undefined || num(p.kg) >= r.kg;
+  const kgOk = r.kg === undefined || estimatedWeight(r.lake) >= r.kg;
   if(isGoldRegion(r)){
     const g = goldFish();
     return {done: g >= r.tickets, gate: g >= r.ticketGate, kgOk};
@@ -1039,10 +1080,12 @@ function advice(lake){
 /* ---------------- actions ---------------- */
 const $ = id => document.getElementById(id);
 
-function creditEvent(n){
+function creditEvent(lures, legendaries){
   const credit = state.lastRegion;
-  if(!regionFor(credit) || n <= 0) return null;
-  methodProgress[credit].dragon = (methodProgress[credit].dragon || 0) + n;
+  if(!regionFor(credit) || lures <= 0) return null;
+  const p = methodProgress[credit];
+  p.eventLures = (p.eventLures || 0) + lures;
+  p.dragon = (p.dragon || 0) + Math.max(0, legendaries || 0);
   saveMethodNow();
   return credit;
 }
@@ -1060,9 +1103,10 @@ function catchFish(t){
   if(c[t] <= 0) return;
   c[t] -= 1;
   let entry = {t, draw:fillDraw(lake, 1)};
-  if(isEventLake(lake) && t === 'LEG'){
-    const credit = creditEvent(1);
-    if(credit) entry = {...entry, credit};
+  if(isEventLake(lake)){
+    const eventLegs = t === 'LEG' ? 1 : 0;
+    const credit = creditEvent(1, eventLegs);
+    if(credit) entry = {...entry, credit, eventLures:1, eventLegs};
   }
   state.lakes[lake].actionStack.push(entry);
   state.totals[lake].fishCounts[t] += 1;
@@ -1078,8 +1122,9 @@ function catchPool(){
   /* a whole pool is however many draws of the selected multiplier fit in it */
   let entry = {t:'ALL', draw:fillDraw(lake, totalFor(lake))};
   if(isEventLake(lake)){
-    const credit = creditEvent(pool.LEG);
-    if(credit) entry = {...entry, credit, legs:pool.LEG};
+    const eventLures = totalFor(lake);
+    const credit = creditEvent(eventLures, pool.LEG);
+    if(credit) entry = {...entry, credit, eventLures, eventLegs:pool.LEG, legs:pool.LEG};
   }
   const L = state.lakes[lake];
   state.lakes[lake] = {...L, fishCounts:blankPool(), actionStack:[entry]};
@@ -1099,20 +1144,22 @@ function undo(){
   /* older saves stored a bare type string; newer event-pool entries carry the
      region that received the credit */
   const entry = typeof last === 'string' ? {t:last} : last;
-  const back = n => {
+  const back = (lures, legs) => {
     if(!entry.credit || !methodProgress[entry.credit]) return;
-    methodProgress[entry.credit].dragon = Math.max(0, (methodProgress[entry.credit].dragon || 0) - n);
+    const p = methodProgress[entry.credit];
+    p.eventLures = Math.max(0, (p.eventLures || 0) - Math.max(0, lures || 0));
+    p.dragon = Math.max(0, (p.dragon || 0) - Math.max(0, legs || 0));
     saveMethodNow();
   };
   if(entry.t === 'ALL'){
     const pool = fullPool(lake);
     TYPES.forEach(t => state.totals[lake].fishCounts[t] -= pool[t]);
     state.lakes[lake] = {...state.lakes[lake], fishCounts:pool, actionStack:[]};
-    back(entry.legs || 0);
+    back(entry.eventLures || 0, entry.eventLegs ?? entry.legs ?? 0);
   }else{
     state.lakes[lake].fishCounts[entry.t] += 1;
     state.totals[lake].fishCounts[entry.t] -= 1;
-    back(1);
+    back(entry.eventLures || 0, entry.eventLegs ?? (entry.credit && entry.t === 'LEG' ? 1 : 0));
   }
   unfillDraw(lake, entry.draw);
   commit();
@@ -1425,6 +1472,15 @@ function syncRegionCard(card, r){
     if(icon) icon.outerHTML = ok ? TICK : RING;
   });
 
+  const kgEl = card.querySelector('[data-role="kg-estimate"]');
+  if(kgEl){
+    kgEl.textContent = fmtKg(estimatedWeight(r.lake));
+    const meta = card.querySelector('[data-role="kg-meta"]');
+    const stat = quickStat(r.lake);
+    if(meta && stat) meta.textContent = luresTowards(r.lake) + ' lures · ' +
+      stat.kgPerLure + ' kg/lure · ~' + estimatedSilver(r.lake).toLocaleString('en-US') + ' silver';
+  }
+
   const lcEl = card.querySelector('.legcount');
   if(lcEl){
     const lc = legTowards(r.lake), col = st.legOk ? 'var(--good)' : 'var(--legend)';
@@ -1501,13 +1557,16 @@ function renderMethod(){
           '<span class="c">' + mr + '/' + r.mult + '</span>' +
           '<button type="button" data-f="mult+" aria-label="One more multiplier"' + (mr >= r.mult ? ' disabled' : '') + '>+</button>' +
         '</span></span>',
-      kg: ok =>
-        '<span class="sl">' + (isGoldRegion(r) ? 'Reach <b>' + r.kg + '</b> kg'
+      kg: ok => {
+        const stat = quickStat(r.lake);
+        return '<span class="sl">' + (isGoldRegion(r) ? 'Reach <b>' + r.kg + '</b> kg'
                                                : 'Run 1\u00d7 to <b>' + r.kg + '+</b> kg') +
-        '</span><span class="manual">manual</span>' +
-        '<span class="sc"><input type="number" min="0" step="1" data-f="kg" placeholder="' + r.kg + '" ' +
-          'aria-label="Weight in kg" value="' + (Number.isNaN(p.kg) ? '' : p.kg) + '">' +
-          '<span class="unit">kg</span></span>',
+          '<span class="weightmeta" data-role="kg-meta">' + luresTowards(r.lake) + ' lures · ' +
+            stat.kgPerLure + ' kg/lure · ~' + estimatedSilver(r.lake).toLocaleString('en-US') + ' silver</span>' +
+        '</span><span class="manual">estimate</span>' +
+        '<span class="sc"><span class="weight-est" data-role="kg-estimate">' + fmtKg(estimatedWeight(r.lake)) + '</span>' +
+          '<span class="unit">kg</span></span>';
+      },
       scouted: ok =>
         '<span class="sl">Found the easiest golden fish</span>' +
         '<span class="sc"><button class="btn" data-f="scouted" style="padding:5px 10px;font-size:.72rem">' +
@@ -1673,7 +1732,7 @@ function goalMessage(key){
       ? 'Region ' + r.n + ' complete — ' + r.tickets + ' golden fish'
       : 'Region ' + r.n + ' complete — ' + r.leg + ' legendary';
     case 'mult': return 'Region ' + r.n + ': ' + r.multWord + ' 10× multipliers done';
-    case 'kg':   return 'Region ' + r.n + ': ' + r.kg + ' kg reached';
+    case 'kg':   return 'Region ' + r.n + ': estimated ' + r.kg + ' kg reached';
     case 'leg':  return 'Region ' + r.n + ': ' + r.leg + ' legendary caught';
     case 'gate': return 'Region ' + r.n + ': ' + r.ticketGate + ' golden fish — gate cleared';
     default:     return null;
