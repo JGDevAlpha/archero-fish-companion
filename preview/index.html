@@ -852,8 +852,8 @@ body{
   </div>
 
   <nav class="version-switch" aria-label="App version">
-    <a href="../">Current</a>
-    <a href="./" aria-current="page">Preview</a>
+    <a href="../" data-ui-version="current">Current</a>
+    <a href="./" data-ui-version="preview" aria-current="page">Preview</a>
   </nav>
 
   <section class="preview-top">
@@ -2380,6 +2380,18 @@ if(window.matchMedia){
   else if(mq.addListener) mq.addListener(syncAutoTheme);
 }
 
+document.querySelectorAll('[data-ui-version]').forEach(a => {
+  a.addEventListener('click', () => {
+    try { localStorage.setItem('fishingCompanionUi', a.dataset.uiVersion); } catch {}
+  });
+});
+try {
+  if(localStorage.getItem('fishingCompanionUi') === 'current') {
+    window.location.href = '../';
+  } else if(!localStorage.getItem('fishingCompanionUi')) {
+    localStorage.setItem('fishingCompanionUi','preview');
+  }
+} catch {}
 load();
 applyTheme();
 render();
