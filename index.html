@@ -455,6 +455,24 @@ input[type=number]::placeholder{color:var(--ink-dim);font-size:.66rem;letter-spa
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001s !important;transition-duration:.001s !important}
 }
+
+/* current / preview page switch */
+.version-switch{
+  display:grid;grid-template-columns:1fr 1fr;gap:2px;
+  width:156px;margin:-2px 0 0 auto;padding:3px;
+  background:var(--raised);border:1px solid var(--line);border-radius:999px;
+  box-shadow:var(--bezel)
+}
+.version-switch a{
+  min-height:28px;padding:0 10px;border-radius:999px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink-dim);font-size:.64rem;font-weight:700;text-decoration:none;
+}
+.version-switch a[aria-current="page"]{
+  background:var(--panel);color:var(--accent);
+  box-shadow:0 2px 8px #0d2b3514
+}
+
 </style>
 
 <div class="wrap">
@@ -464,6 +482,11 @@ input[type=number]::placeholder{color:var(--ink-dim);font-size:.66rem;letter-spa
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
+
+  <nav class="version-switch" aria-label="App version">
+    <a href="./" aria-current="page">Current</a>
+    <a href="preview/">Preview</a>
+  </nav>
 
   <div class="panel note prose" id="note" hidden>
     <h3>How to use</h3>
@@ -680,8 +703,15 @@ const FULL_NAME = {Lakehouse:'Lakehouse',Sunset:'Sunset Coast',Oceanic:'Oceanic 
 /* tab labels: full names don't fit five across, Dragon Gate needs the qualifier */
 const TAB_NAME = {Lakehouse:'Lakehouse',Sunset:'Sunset',Oceanic:'Oceanic',Polar:'Polar',Dragon:'Dragon Gate',Fullmoon:'Fullmoon'};
 const isEventLake = l => EVENT_LAKES.includes(l);
-/* the four regions, then whichever event pool is running */
-const zoneLakes = () => LAKES.filter(l => !isEventLake(l) || l === state.eventLake);
+/* Event pools only appear from Lake 3 / Lake 4. While actively fishing the
+   event pool, keep its tab visible so the user can see where they are. */
+const eventHostAllowed = lake => lake === 'Oceanic' || lake === 'Polar';
+const zoneLakes = () => {
+  const normals = LAKES.filter(l => !isEventLake(l));
+  return (eventHostAllowed(state.lastRegion) || isEventLake(state.currentLake))
+    ? [...normals, state.eventLake]
+    : normals;
+};
 const TYPES = ['SR','MR','LR','SE','LE','LEG'];
 const TIER_LABEL = {SR:'SM RARE',MR:'MD RARE',LR:'LG RARE',SE:'SM EPIC',LE:'LG EPIC',LEG:'LEGEND'};
 const TIER_VAR   = {SR:'--rare',MR:'--rare',LR:'--rare',SE:'--epic',LE:'--epic',LEG:'--legend'};
@@ -697,7 +727,7 @@ const MULTS      = [1, 2, 5, 10];
 const PLAN_MULT  = 10;
 /* Quick Fishing measured averages per lure. Event pools do not have their own
    economy: Dragon Gate / Fullmoon use the rate of the region where the gate
-   appeared (known gate regions are lakes 2-4), so event lures are credited back
+   appeared (gate regions are lakes 3-4), so event lures are credited back
    to that host region before weight/ticket estimates are calculated. */
 const QUICK_FISHING = {
   Lakehouse:{silverPerLure:80,  kgPerLure:.968},
@@ -1310,6 +1340,7 @@ function renderReadout(){
   const credit = state.lastRegion, cr = regionFor(credit);
   const ev = state.eventLake, inEvent = state.currentLake === ev;
   const eb = $('eventBtn');
+  eb.hidden = !inEvent && !eventHostAllowed(credit);
   eb.innerHTML = EVENT_ICON[ev] +
     (inEvent ? 'Back to ' + TAB_NAME[credit]
              : FULL_NAME[ev] + ' appeared<span class="who">\u2192 ' + TAB_NAME[credit] + '</span>') +
@@ -1443,10 +1474,11 @@ function eventRow(r, dc){
    had the same four rows -- Option 1 has regions with no weight step at all. */
 function regionRows(r){
   const p = methodProgress[r.lake], st = regionStats(r);
-  const rows = isGoldRegion(r) ? [{k:'gate', ok:st.gate}]
-                               : [{k:'mult', ok:st.multOk}];
+  const rows = isGoldRegion(r)
+    ? [{k:'gate', ok:st.gate}]
+    : [{k:'mult', ok:st.multOk}, {k:'leg', ok:st.legOk}];
   if(r.kg !== undefined) rows.push({k:'kg', ok:st.kgOk});
-  rows.push(isGoldRegion(r) ? {k:'scouted', ok:!!p.scouted} : {k:'leg', ok:st.legOk});
+  if(isGoldRegion(r)) rows.push({k:'scouted', ok:!!p.scouted});
   rows.push({k:'event', ok:null});       // a tally, not a completable step
   return rows;
 }
@@ -1540,7 +1572,7 @@ function renderMethod(){
       ? '<b>' + goldFish() + '</b>/' + r.tickets + ' golden fish'
       : '<b>' + legTowards(r.lake) + '</b>/' + r.leg + ' legendary';
     const lc = legTowards(r.lake), mr = multRun(r.lake), g = goldFish();
-    const AUTO = '<span class="manual" style="border:0;padding:0;margin-left:6px">auto</span>';
+    const AUTO = '';
     /* Built from regionRows so the rows and their tick flags stay in step. */
     const ROW = {
       gate: ok =>
@@ -1784,7 +1816,9 @@ $('openInfo').addEventListener('click', () => { $('note').hidden = !$('note').hi
 /* ---------------- wiring ---------------- */
 $('poolBtn').addEventListener('click', catchPool);
 $('eventBtn').addEventListener('click', () => {
-  state.currentLake = state.currentLake === state.eventLake ? state.lastRegion : state.eventLake;
+  const inEvent = state.currentLake === state.eventLake;
+  if(!inEvent && !eventHostAllowed(state.lastRegion)) return;
+  state.currentLake = inEvent ? state.lastRegion : state.eventLake;
   commit();
 });
 $('refillBtn').addEventListener('click', refill);
