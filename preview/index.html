@@ -1,13 +1,14 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Fishing Companion Preview — Archero 2</title>
 <meta name="robots" content="noindex,nofollow">
 <meta name="description" content="Pool tracking, legendary odds, break-line advice and the region method plan for the Archero 2 Angler's Bounty event.">
-<meta name="color-scheme" content="light">
-<meta name="theme-color" content="#EAF6FA">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#E9F1F3" media="(prefers-color-scheme:light)">
+<meta name="theme-color" content="#081A22" media="(prefers-color-scheme:dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -637,293 +638,27 @@ body{
   .preview-more{min-height:40px}
 }
 
-
-/* preview v2: polished light-mode treatment from approved mockup */
-body{
-  background:
-    linear-gradient(180deg,rgba(229,245,251,.96) 0%,rgba(246,251,253,.98) 44%,#eef7fa 100%);
-}
-.wrap{position:relative}
-.masthead{
-  position:relative;z-index:2;
-  padding:6px 2px 2px;
-}
-.masthead::after{
-  content:"";position:absolute;left:-12px;right:-12px;top:-10px;height:116px;z-index:-1;
-  border-radius:0 0 24px 24px;
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.6)),
-    radial-gradient(110% 95% at 50% 0%,#9ed8e8 0%,#d5eef5 45%,#eff9fb 100%);
-  box-shadow:0 10px 28px #2c607017;
-}
-.masthead h1{color:#0e2a3a}
-.masthead h1::before{
-  content:"🐟";font-size:1.15rem;line-height:1;margin-right:3px;filter:saturate(.9)
-}
-.masthead h1::after{display:none}
-.icon-btn{
-  width:38px;height:38px;border-radius:999px!important;
-  background:rgba(255,255,255,.82)!important;
-  border:1px solid rgba(111,160,178,.26)!important;
-  color:#1b5268!important;
-  box-shadow:0 8px 22px #1d60791a!important;
-  backdrop-filter:blur(8px);
-}
-.preview-select-row{margin-top:4px}
-.preview-lake-select{
-  max-width:240px;margin:0 auto;
-  border-color:#cbdfe7;
-  background:rgba(255,255,255,.92);
-  box-shadow:0 10px 28px #1a607819;
-  color:#12344a;
-}
-.preview-pin{
-  width:18px;height:18px;display:grid;place-items:center;border-radius:50%;
-  background:#dff6fb;color:#0d8ba7;font-size:.55rem
-}
-.preview-set-pill{
-  background:rgba(255,255,255,.88);
-  border-color:#cbdfe7;
-  color:#577486;
-  box-shadow:0 8px 20px #1a60780d;
-}
-.preview-goal{
-  border:1px solid #d2e4eb;
-  background:rgba(255,255,255,.96);
-  box-shadow:0 12px 30px #1b5e7314;
-}
-.preview-goal-icon{
-  color:#0cad76;background:#e6f8f0;
-  box-shadow:inset 0 0 0 1px #c8eedf;
-}
-.preview-goal-track{background:#e5eef2}
-.preview-goal-track span{background:linear-gradient(90deg,#15b379,#38cf98)}
-.preview-goal-value{color:#17394c}
-.preview-section-label::before{
-  content:"⚡";margin-right:6px;color:#117f99;font-size:.82rem
-}
-.mults button{
-  background:#e7f0f5;color:#17394b;border:1px solid #d9e7ec
-}
-.mults button[aria-pressed="true"]{
-  background:linear-gradient(180deg,#1ba5bb,#0c839d);
-  color:#fff;box-shadow:0 7px 18px rgba(12,131,157,.25)
-}
-.drawline{color:#607986}
-.plate{
-  background:#fdfefe;
-  border-color:#d4e4ea;
-  box-shadow:0 7px 20px rgba(25,77,96,.10)
-}
-.plate .art{
-  background:
-    radial-gradient(80% 120% at 50% 118%, color-mix(in oklch,var(--tier) 38%,transparent), transparent 70%),
-    linear-gradient(180deg,#1c4961,#0e3143);
-}
-#poolBtn{
-  background:linear-gradient(180deg,#1aa4bb,#0a819c);
-  box-shadow:0 10px 22px rgba(10,129,156,.20)
-}
-#eventBtn{
-  background:linear-gradient(180deg,#fff8e7,#fff1cc);
-  border-color:#f0cf79;color:#a06700;
-  box-shadow:0 8px 18px rgba(172,122,18,.09)
-}
-#eventBtn.event-active-preview{
-  background:linear-gradient(180deg,#f3ecff,#e8dcff);
-  border-color:#c6afff;color:#6742c8;
-}
-.panel.meter{
-  background:rgba(255,255,255,.96);
-  box-shadow:0 10px 26px rgba(29,76,94,.10)
-}
-.meter .top .lbl::before{content:"✂";margin-right:6px;color:#235b70}
-.meter .acts .btn{
-  background:#e8f1f5;color:#16394c;border:1px solid #d7e5eb
-}
-#refillBtn{
-  background:linear-gradient(180deg,#1aa4bb,#0a819c);
-  box-shadow:0 8px 18px rgba(10,129,156,.18)
-}
-#undoBtn{
-  background:#edf3f6;color:#6f8996;border:1px solid #dde8ed
-}
-.preview-more{
-  background:#ffffff;
-  border:1px solid #d5e5eb;
-  box-shadow:0 9px 24px rgba(24,72,90,.09)
-}
-.preview-more-icon{
-  width:32px;height:32px;border-radius:10px;display:grid;place-items:center;
-  background:#e7f5f8;color:#1e7892;font-size:1rem
-}
-.preview-bottom-nav{
-  background:rgba(255,255,255,.94);
-  border-top-color:#d8e6eb;
-  box-shadow:0 -8px 26px rgba(29,76,94,.10)
-}
-.preview-bottom-nav button{color:#537385}
-.preview-bottom-nav button.on{color:#0784a0}
-.preview-bottom-nav .nav-ico{font-size:1rem}
-.sheet.preview-sheet{
-  background:#f8fcfd;
-  border-top-color:#d8e6eb;
-  box-shadow:0 -18px 50px rgba(21,58,72,.18)
-}
-.preview-lake-row{
-  border-color:#d9e7ec;box-shadow:0 4px 12px rgba(25,77,96,.05)
-}
-.preview-lake-row.on{background:#eaf7fb;border-color:#9ed4df}
-.preview-event-options button{border-color:#d8e6eb;background:#fff}
-.preview-event-options button.on{background:#e9f7fb;border-color:#8ccddd;color:#087991}
-.preview-stat,.preview-guide-card{box-shadow:0 6px 18px rgba(25,77,96,.06)}
-
-
-/* preview v3: literal approved light-mode visual language */
-:root[data-theme="light"]{
-  --ground:#eef8fb;--panel:#fff;--raised:#eaf2f6;--sunk:#dfeaf0;
-  --line:#d4e4eb;--line-soft:#e4eef2;--ink:#0e2b3e;--ink-mid:#3f6070;--ink-dim:#668291;
-  --accent:#0e91aa;--accent-ink:#fff;--accent-soft:#dff4f8;
-  --shadow:0 10px 30px rgba(22,67,84,.10);--bezel:none;
-}
-body{background:#edf8fb!important}
-.wrap{max-width:27rem!important;padding-top:0!important;gap:7px!important}
-.masthead{
-  min-height:132px!important;margin:0 -12px -72px!important;padding:16px 18px 82px!important;
-  align-items:flex-start!important;
-  background:
-    linear-gradient(180deg,rgba(238,250,253,.08) 0%,rgba(238,250,253,.15) 48%,#edf8fb 100%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 240'%3E%3Crect width='800' height='240' fill='%23dff4f9'/%3E%3Ccircle cx='650' cy='42' r='24' fill='%23fff9d7' opacity='.82'/%3E%3Cpath d='M0 120 115 45l72 57 92-84 88 92 80-64 104 73 88-61 161 86v106H0Z' fill='%23a7d7e5'/%3E%3Cpath d='M0 144 96 80l74 51 91-59 82 72 90-67 82 54 102-65 183 91v83H0Z' fill='%237db9ce' opacity='.7'/%3E%3Cpath d='M0 164c120-25 240-6 350 2s229-15 450-2v76H0Z' fill='%23caedf4'/%3E%3Cpath d='M0 177c110-15 235-4 360 1s257-9 440 0' fill='none' stroke='%23fff' stroke-opacity='.75' stroke-width='3'/%3E%3Cpath d='M52 155l22-45 20 45M90 156l28-60 29 60M675 158l18-43 18 43M718 158l24-55 24 55' stroke='%23578e77' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-size:cover;background-position:center top;border-radius:0 0 22px 22px;
-  box-shadow:none!important;
-}
-.masthead::after{display:none!important}
-.masthead h1{
-  display:flex!important;align-items:center!important;gap:8px!important;font-size:.96rem!important;
-  color:#0a354b!important;text-shadow:0 1px 0 #fff8
-}
-.preview-brand-fish{display:flex;width:31px;height:24px;color:#087f9e}
-.preview-brand-fish svg{width:100%;height:100%}
-.preview-brand-copy{display:flex;flex-direction:column;line-height:1.05}
-.preview-brand-copy .sub{display:block!important;margin-top:4px;font-size:.52rem!important;letter-spacing:.12em!important;color:#688698!important}
-.preview-settings-btn{
-  margin-left:auto!important;background:#ffffffd9!important;width:38px!important;height:38px!important;
-  border:1px solid #cfe0e7!important;box-shadow:0 8px 22px #23596f1a!important
-}
-.preview-settings-btn svg{width:18px;height:18px}
-.preview-top{position:relative;z-index:3}
-.preview-select-row{justify-content:center!important;margin-top:0!important}
-.preview-lake-select{
-  flex:0 1 208px!important;min-height:42px!important;border-radius:14px!important;
-  background:#fffffff2!important;border:1px solid #d5e4ea!important;box-shadow:0 9px 22px #184e661c!important
-}
-.preview-lake-select .preview-pin{background:none!important;width:18px!important;height:18px!important}
-.preview-pin svg{width:18px;height:18px}
-.preview-set-pill{display:none!important}
-.preview-goal{
-  margin-top:2px!important;padding:9px 10px!important;min-height:60px!important;border-radius:14px!important;
-  box-shadow:0 10px 28px #173f5114!important
-}
-.preview-goal-icon{width:34px!important;height:34px!important;border-radius:50%!important;background:#e8f8f1!important;color:#08a96d!important}
-.preview-goal-icon svg{width:22px;height:22px}
-.preview-goal-kicker{display:none!important}
-.preview-goal-title{font-size:.74rem!important;font-weight:750!important}
-.preview-goal-track{height:7px!important;margin-top:7px!important}
-.preview-goal-value{font-size:.75rem!important}
-.preview-section-label{
-  display:flex!important;align-items:center!important;font-size:.76rem!important;font-weight:800!important;color:#15374a!important
-}
-.preview-section-label::before{
-  content:""!important;width:16px;height:18px;display:inline-block;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m13 2-8 12h6l-1 8 9-13h-6l0-7Z' fill='%2316556c'/%3E%3C/svg%3E") center/contain no-repeat;
-}
-.mults{gap:7px!important}
-.mults button{
-  min-height:40px!important;border-radius:11px!important;border:0!important;background:#e7f0f5!important;
-  color:#12374b!important;font-weight:780!important;box-shadow:none!important
-}
-.mults button[aria-pressed="true"]{
-  background:linear-gradient(180deg,#1da7bb,#0a839d)!important;color:#fff!important;
-  box-shadow:0 8px 20px rgba(12,132,158,.22)!important
-}
-.drawline{font-size:.72rem!important}
-.plates{gap:6px!important}
-.plate{
-  border-radius:12px!important;border:1px solid #cfe0e7!important;box-shadow:0 7px 18px #19495d10!important
-}
-.plate::before{height:3px!important}
-.plate .art{height:55px!important;background:linear-gradient(180deg,#204f67,#10384c)!important}
-.plate .art img{height:41px!important}
-.plate .meta{padding:4px 4px 7px!important}
-.plate .ct{font-size:.76rem!important;color:#fff!important;background:#143d51;border-radius:0 0 9px 9px;margin:-4px -4px -7px;padding:6px 4px;text-align:center}
-#poolBtn{
-  min-height:44px!important;border-radius:11px!important;font-size:.8rem!important;
-  background:linear-gradient(180deg,#1da8be,#0b839d)!important;box-shadow:0 9px 20px #0b839d24!important
-}
-#eventBtn{
-  min-height:46px!important;justify-content:flex-start!important;padding:8px 12px!important;border-radius:11px!important;
-  font-size:.75rem!important;box-shadow:0 6px 16px #8b64100c!important
-}
-#eventBtn svg{width:18px!important;height:18px!important}
-#eventBtn .who{margin-left:auto!important}
-#eventBtn.event-active-preview{
-  background:linear-gradient(180deg,#f5efff,#e9ddff)!important;border-color:#c4affb!important;color:#6440cb!important
-}
-.panel.meter{border-radius:13px!important;padding:9px 10px!important}
-.meter .top .lbl{font-size:.74rem!important}
-.meter .top .lbl::before{content:"✂";font-size:.95rem}
-.meter .val{font-size:.82rem!important}
-.meter .acts .btn{min-height:38px!important;border-radius:9px!important}
-.rowbtns .btn{min-height:40px!important;border-radius:10px!important}
-.preview-more{
-  min-height:50px!important;border-radius:12px!important;padding:8px 10px!important
-}
-.preview-more-icon{
-  background:none!important;width:28px!important;height:28px!important;color:#2d6278!important
-}
-.preview-more-icon svg{width:22px;height:22px}
-.preview-more b{font-size:.76rem!important}
-.preview-more small{font-size:.58rem!important}
-.preview-bottom-nav{
-  height:calc(64px + env(safe-area-inset-bottom,0px))!important;padding:5px 10px env(safe-area-inset-bottom,0px)!important;
-  background:#fffffff5!important
-}
-.preview-bottom-nav button{font-size:.58rem!important;gap:3px!important}
-.preview-bottom-nav .nav-ico{width:21px;height:21px;display:grid;place-items:center}
-.preview-bottom-nav .nav-ico svg{width:20px;height:20px}
-.preview-bottom-nav button.on{color:#087f9e!important}
-.sheet.preview-sheet{background:#f9fcfd!important}
-.sheet.preview-sheet header h2{font-size:.95rem!important}
-.preview-lake-row{min-height:56px!important;border-radius:12px!important}
-.preview-lake-row.on{background:#e7f5fb!important}
-.preview-stat{border-radius:12px!important}
-
 </style>
 
 <div class="wrap">
   <div class="masthead">
-    <h1><span class="preview-brand-fish" aria-hidden="true">
-      <svg viewBox="0 0 48 32" fill="none"><path d="M7 16c6-8 14-11 24-8 5 2 8 5 10 8-2 3-5 6-10 8-10 3-18 0-24-8Z" fill="currentColor"/><path d="M7 16 1 9v14l6-7Z" fill="currentColor"/><circle cx="31" cy="13" r="1.7" fill="#fff"/></svg>
-    </span><span class="preview-brand-copy">Fishing Companion <span class="sub">ARCHERO 2</span></span></h1>
-    <button class="icon-btn framed preview-settings-btn" id="menuBtn" aria-label="Open settings" aria-expanded="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1a1.7 1.7 0 0 0-1.4-1.67 1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 3.8 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2v-4h.1A1.7 1.7 0 0 0 3.77 8.2a1.7 1.7 0 0 0-.34-1.88l-.06-.06L6.23 3.4l.06.06A1.7 1.7 0 0 0 8.17 3.8a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V2h4v.1a1.7 1.7 0 0 0 1.4 1.67 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19.4 8c.12.38.33.72.6 1 .28.28.62.48 1 .6h.1v4H21a1.7 1.7 0 0 0-1.6 1.4Z"/>
-      </svg>
+    <h1>Fishing Companion <span class="sub">Archero 2</span></h1>
+    <button class="icon-btn framed" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
 
   <section class="preview-top">
     <div class="preview-select-row">
       <button class="preview-lake-select" id="previewLakeBtn" type="button" aria-haspopup="dialog">
-        <span class="preview-pin" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.4"/></svg></span>
+        <span class="preview-pin">●</span>
         <span id="previewLakeText">Lakehouse</span>
         <span class="preview-chevron">⌄</span>
       </button>
       <span class="preview-set-pill">Set <b id="previewSetNow">2</b></span>
     </div>
     <div class="preview-goal panel" id="previewGoal">
-      <div class="preview-goal-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12 21 3"/><path d="M16 3h5v5"/></svg></div>
+      <div class="preview-goal-icon">◎</div>
       <div class="preview-goal-copy">
         <div class="preview-goal-kicker">Current goal</div>
         <div class="preview-goal-title" id="previewGoalTitle">Loading goal…</div>
@@ -1000,7 +735,7 @@ body{background:#edf8fb!important}
   </div>
 
   <button class="preview-more panel" id="previewDetailsBtn" type="button">
-    <span class="preview-more-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span>
+    <span class="preview-more-icon">▥</span>
     <span><b>More details</b><small>Odds, estimates, catches and strategy</small></span>
     <span class="preview-chevron">⌄</span>
   </button>
@@ -1052,16 +787,16 @@ body{background:#edf8fb!important}
 
 <nav class="preview-bottom-nav" id="previewBottomNav" aria-label="Preview navigation">
   <button type="button" data-nav="fishing" class="on">
-    <span class="nav-ico"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 12c3.2-4.2 6.6-6.2 10.3-6 3.1.2 5.5 1.6 7.2 4.2-1.7 2.6-4.1 4-7.2 4.2C9.6 14.6 6.2 12.6 3 8.4V12Z"/><path d="M3 8.4 0 5v7l3-3.6Z"/><circle cx="15.8" cy="9.4" r="1" fill="white"/></svg></span><span>Fishing</span>
+    <span class="nav-ico">◉</span><span>Fishing</span>
   </button>
   <button type="button" data-nav="goals">
-    <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12 20 4"/></svg></span><span>Goals</span>
+    <span class="nav-ico">◎</span><span>Goals</span>
   </button>
   <button type="button" data-nav="stats">
-    <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span><span>Stats</span>
+    <span class="nav-ico">▥</span><span>Stats</span>
   </button>
   <button type="button" data-nav="guide">
-    <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 5.5C6 4 9 4.3 12 6v14c-3-1.7-6-2-9-.5v-14Z"/><path d="M21 5.5C18 4 15 4.3 12 6v14c3-1.7 6-2 9-.5v-14Z"/></svg></span><span>Guide</span>
+    <span class="nav-ico">▤</span><span>Guide</span>
   </button>
 </nav>
 
@@ -1127,7 +862,7 @@ body{background:#edf8fb!important}
 <div class="sheet" id="menuSheet" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true">
   <div class="grab"></div>
   <header>
-    <h2>Settings</h2>
+    <h2>Menu</h2>
     <button class="icon-btn" data-close aria-label="Close menu" style="margin-left:auto">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
     </button>
@@ -1865,10 +1600,9 @@ function renderReadout(){
   const ev = state.eventLake, inEvent = state.currentLake === ev;
   const eb = $('eventBtn');
   eb.hidden = !inEvent && !['Oceanic','Polar'].includes(credit);
-  eb.classList.toggle('event-active-preview', inEvent);
   eb.innerHTML = EVENT_ICON[ev] +
-    (inEvent ? FULL_NAME[ev] + ' active<span class="who">\u2192 ' + TAB_NAME[credit] + '</span>'
-             : 'Ready for an event?<span class="who">Available in Lake 3 & 4</span>') +
+    (inEvent ? 'Back to ' + TAB_NAME[credit]
+             : FULL_NAME[ev] + ' appeared<span class="who">\u2192 ' + TAB_NAME[credit] + '</span>') +
     (eventCredit(credit) ? '<span class="tot">' + eventCredit(credit) + '</span>' : '');
   eb.title = inEvent
     ? 'Return to ' + FULL_NAME[credit]
@@ -2474,7 +2208,6 @@ $('themeSeg').addEventListener('click', e => {
 
 load();
 themePref = 'light';
-document.documentElement.dataset.theme = 'light';
 applyTheme();
 render();
 </script>
