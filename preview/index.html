@@ -735,6 +735,26 @@ body{
   color:#06212a;
 }
 
+
+/* current / preview page switch */
+.version-switch{
+  display:grid;grid-template-columns:1fr 1fr;gap:2px;
+  width:156px;margin:0 0 0 auto;padding:3px;
+  background:var(--raised);border:1px solid var(--line);border-radius:999px;
+  box-shadow:var(--bezel)
+}
+.version-switch a{
+  min-height:28px;padding:0 10px;border-radius:999px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink-dim);font-size:.64rem;font-weight:700;text-decoration:none;
+}
+.version-switch a[aria-current="page"]{
+  background:var(--panel);color:var(--accent);
+  box-shadow:0 2px 8px #0d2b3514
+}
+:root[data-theme="dark"] .version-switch{background:#153541;border-color:#214a5a}
+:root[data-theme="dark"] .version-switch a[aria-current="page"]{background:#102a35;color:#45c6de}
+
 </style>
 
 <div class="wrap">
@@ -747,6 +767,11 @@ body{
       </svg>
     </button>
   </div>
+
+  <nav class="version-switch" aria-label="App version">
+    <a href="../">Current</a>
+    <a href="./" aria-current="page">Preview</a>
+  </nav>
 
   <section class="preview-top">
     <div class="preview-select-row">
@@ -876,7 +901,7 @@ body{
   </div>
 
   <p class="foot">
-    <span id="saveNote">Progress is saved in this browser only.</span><br>
+    <span id="saveNote">Progress is shared with the Current page in this browser.</span><br>
     Companion clone of <a href="https://ksun4176.github.io/archero2-fish-companion/" target="_blank" rel="noopener">ksun4176/archero2-fish-companion</a> · <a href="https://ko-fi.com/O4O71FBM0I" target="_blank" rel="noopener">support the original author</a><br>
     <!-- Geist and Geist Mono ship inlined as woff2 data URIs. OFL-1.1 requires the
          copyright notice and licence to travel with the fonts, so it belongs on the
@@ -1246,20 +1271,9 @@ function unfillDraw(lake, rec){
    setItem there threw before render() ran, which froze the entire UI -- catches
    and set changes silently did nothing. Never let storage break the app. */
 let storageOK = true;
-const PREVIEW_STORAGE_PREFIX = 'fc-redesign-preview-v1:';
 const store = {
-  get(k){
-    try{
-      const pk = PREVIEW_STORAGE_PREFIX + k;
-      let v = localStorage.getItem(pk);
-      if(v === null){
-        const live = localStorage.getItem(k);
-        if(live !== null){ localStorage.setItem(pk, live); v = live; }
-      }
-      return v;
-    }catch{ storageOK = false; return null; }
-  },
-  set(k, v){ try{ localStorage.setItem(PREVIEW_STORAGE_PREFIX + k, v); return true; }catch{ storageOK = false; return false; } },
+  get(k){ try{ return localStorage.getItem(k); }catch{ storageOK = false; return null; } },
+  set(k, v){ try{ localStorage.setItem(k, v); return true; }catch{ storageOK = false; return false; } },
 };
 
 /* The event pool rotates, and a record written before it was a choice names no
@@ -1357,9 +1371,9 @@ function load(){
   /* A write that neither throws nor persists is possible, so round-trip a probe
      rather than trusting the absence of an exception. */
   try{
-    localStorage.setItem(PREVIEW_STORAGE_PREFIX + '__probe', '1');
-    if(localStorage.getItem(PREVIEW_STORAGE_PREFIX + '__probe') !== '1') storageOK = false;
-    localStorage.removeItem(PREVIEW_STORAGE_PREFIX + '__probe');
+    localStorage.setItem('__probe', '1');
+    if(localStorage.getItem('__probe') !== '1') storageOK = false;
+    localStorage.removeItem('__probe');
   }catch{ storageOK = false; }
 
   try{ applyTracker(JSON.parse(store.get('fishingTracker') || 'null')); }
