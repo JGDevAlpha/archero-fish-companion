@@ -602,14 +602,6 @@ body{
 .preview-lake-row small{display:block;color:var(--pv-muted);font-size:.63rem;margin-top:2px}
 .preview-lake-row.on{background:#e7f5f8;border-color:#9ed3dd}
 .preview-check{color:var(--pv-blue);font-weight:900}
-.preview-event-settings{padding:10px 12px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--pv-border)}
-.preview-sheet-label{display:block;font-size:.68rem;font-weight:780;margin-bottom:7px}
-.preview-event-options{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.preview-event-options button{
-  min-height:42px;border:1px solid var(--pv-border);border-radius:11px;background:#fff;color:var(--pv-ink);font:inherit;font-size:.7rem;font-weight:730
-}
-.preview-event-options button.on{background:var(--pv-blue-soft);border-color:#82c8d6;color:#056d84}
-.preview-event-settings small{display:block;color:var(--pv-muted);font-size:.59rem;margin-top:7px}
 .preview-stats{padding:10px 12px calc(18px + env(safe-area-inset-bottom,0px))!important}
 .preview-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .preview-stat{
@@ -787,7 +779,6 @@ body{
 .preview-event-choice .event-ico svg{width:19px;height:19px}
 .preview-event-choice strong{font-size:.76rem}.preview-event-choice small{display:block;margin-top:2px;font-size:.6rem;color:var(--pv-muted)}
 .preview-event-choice.on{border-color:#7cc9d8;background:var(--pv-blue-soft)}
-.preview-event-choice:disabled{opacity:.45;cursor:not-allowed}
 
 /* Dark-mode readability corrections */
 :root[data-theme="dark"] .preview-set-select{
@@ -1037,11 +1028,6 @@ body{
     <button class="icon-btn" data-close aria-label="Close lake selector" style="margin-left:auto">×</button>
   </header>
   <div class="body preview-list" id="previewLakeList"></div>
-  <div class="preview-event-settings" id="previewEventSettings">
-    <span class="preview-sheet-label">Event pool for this rotation</span>
-    <div class="preview-event-options" id="previewEventOptions"></div>
-    <small>Event pools are only available while fishing Lake 3 or Lake 4.</small>
-  </div>
 </div>
 
 <!-- preview event pool selector -->
@@ -2247,35 +2233,23 @@ function renderPreviewLakeSheet(){
     });
     host.appendChild(b);
   });
-  const eventBox = $('previewEventSettings');
-  eventBox.hidden = !['Oceanic','Polar'].includes(base);
-  const opts = $('previewEventOptions');
-  opts.innerHTML = '';
-  EVENT_LAKES.forEach(l => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = l === state.eventLake ? 'on' : '';
-    b.textContent = TAB_NAME[l];
-    b.addEventListener('click', () => { setEventLake(l); renderPreviewChrome(); });
-    opts.appendChild(b);
-  });
 }
 function renderPreviewEventSheet(){
-  const base = previewBaseLake();
-  const allowed = ['Oceanic','Polar'].includes(base);
-  const idx = ['Lakehouse','Sunset','Oceanic','Polar'].indexOf(base);
   const host = $('previewEventHost');
-  host.innerHTML = allowed
-    ? '<b>Lake ' + (idx+1) + ' · ' + FULL_NAME[base] + '</b>Choose which event pool is live for this rotation.'
-    : '<b>Event pools unavailable</b>Dragon Gate and Fullmoon can only appear while fishing Lake 3 or Lake 4.';
+  host.innerHTML =
+    '<b>Select the live event pool</b>' +
+    'Choose Dragon Gate or Fullmoon for the current rotation. ' +
+    'You can enter the selected event pool only from Lake 3 or Lake 4 using the event button beneath Catch whole pool.';
   const picker = $('previewEventPicker');
   picker.innerHTML = '';
   EVENT_LAKES.forEach(l => {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'preview-event-choice' + (l === state.eventLake ? ' on' : '');
-    b.disabled = !allowed;
     b.innerHTML = '<span class="event-ico">' + EVENT_ICON[l] + '</span>' +
-      '<span><strong>' + FULL_NAME[l] + '</strong><small>Uses the averages of the lake where it appeared.</small></span>' +
+      '<span><strong>' + FULL_NAME[l] + '</strong><small>' +
+        (l === state.eventLake ? 'Currently live' : 'Set as the live event pool') +
+      '</small></span>' +
       '<span>' + (l === state.eventLake ? '✓' : '›') + '</span>';
     b.addEventListener('click', () => {
       setEventLake(l);
