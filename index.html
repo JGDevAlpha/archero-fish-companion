@@ -484,8 +484,8 @@ input[type=number]::placeholder{color:var(--ink-dim);font-size:.66rem;letter-spa
   </div>
 
   <nav class="version-switch" aria-label="App version">
-    <a href="./" aria-current="page">Current</a>
-    <a href="preview/">Preview</a>
+    <a href="./" data-ui-version="current" aria-current="page">Current</a>
+    <a href="preview/" data-ui-version="preview">Preview</a>
   </nav>
 
   <div class="panel note prose" id="note" hidden>
@@ -1848,6 +1848,18 @@ $('themeSeg').addEventListener('click', e => {
   applyTheme(); renderMenu();
 });
 
+document.querySelectorAll('[data-ui-version]').forEach(a => {
+  a.addEventListener('click', () => {
+    try { localStorage.setItem('fishingCompanionUi', a.dataset.uiVersion); } catch {}
+  });
+});
+try {
+  if(localStorage.getItem('fishingCompanionUi') === 'preview') {
+    window.location.href = 'preview/';
+  } else if(!localStorage.getItem('fishingCompanionUi')) {
+    localStorage.setItem('fishingCompanionUi','current');
+  }
+} catch {}
 load();
 applyTheme();
 render();
