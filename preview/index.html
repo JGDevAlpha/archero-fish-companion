@@ -638,27 +638,41 @@ body{
   .preview-more{min-height:40px}
 }
 
+
+/* icon sizing only */
+.preview-pin{display:inline-flex;align-items:center;justify-content:center}
+.preview-pin svg{width:15px;height:15px}
+.preview-goal-icon svg{width:20px;height:20px}
+.preview-inline-icon{width:14px;height:14px;margin-right:5px;vertical-align:-2px}
+.preview-more-icon{display:inline-flex;align-items:center;justify-content:center}
+.preview-more-icon svg{width:19px;height:19px}
+.preview-bottom-nav .nav-ico{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px}
+.preview-bottom-nav .nav-ico svg{width:18px;height:18px}
+
 </style>
 
 <div class="wrap">
   <div class="masthead">
     <h1>Fishing Companion <span class="sub">Archero 2</span></h1>
     <button class="icon-btn framed" id="menuBtn" aria-label="Open menu" aria-expanded="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1a1.7 1.7 0 0 0-1.4-1.67 1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 3.8 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2v-4h.1A1.7 1.7 0 0 0 3.77 8.2a1.7 1.7 0 0 0-.34-1.88l-.06-.06L6.23 3.4l.06.06A1.7 1.7 0 0 0 8.17 3.8a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V2h4v.1a1.7 1.7 0 0 0 1.4 1.67 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19.4 8c.12.38.33.72.6 1 .28.28.62.48 1 .6h.1v4H21a1.7 1.7 0 0 0-1.6 1.4Z"/>
+      </svg>
     </button>
   </div>
 
   <section class="preview-top">
     <div class="preview-select-row">
       <button class="preview-lake-select" id="previewLakeBtn" type="button" aria-haspopup="dialog">
-        <span class="preview-pin">●</span>
+        <span class="preview-pin" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
         <span id="previewLakeText">Lakehouse</span>
         <span class="preview-chevron">⌄</span>
       </button>
       <span class="preview-set-pill">Set <b id="previewSetNow">2</b></span>
     </div>
     <div class="preview-goal panel" id="previewGoal">
-      <div class="preview-goal-icon">◎</div>
+      <div class="preview-goal-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12 21 3"/><path d="M16 3h5v5"/></svg></div>
       <div class="preview-goal-copy">
         <div class="preview-goal-kicker">Current goal</div>
         <div class="preview-goal-title" id="previewGoalTitle">Loading goal…</div>
@@ -693,7 +707,7 @@ body{
   </div>
 
   <div style="display:flex;flex-direction:column;gap:8px">
-    <div class="lbl preview-section-label">Multiplier</div>
+    <div class="lbl preview-section-label"><svg class="preview-inline-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m13 2-8 12h6l-1 8 9-13h-6V2Z"/></svg>Multiplier</div>
     <div class="mults" id="mults" role="group" aria-label="Draw multiplier"></div>
     <div class="drawline" id="drawLine" aria-live="polite"></div>
     <div class="plates" id="plates"></div>
@@ -735,7 +749,7 @@ body{
   </div>
 
   <button class="preview-more panel" id="previewDetailsBtn" type="button">
-    <span class="preview-more-icon">▥</span>
+    <span class="preview-more-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span>
     <span><b>More details</b><small>Odds, estimates, catches and strategy</small></span>
     <span class="preview-chevron">⌄</span>
   </button>
@@ -787,16 +801,16 @@ body{
 
 <nav class="preview-bottom-nav" id="previewBottomNav" aria-label="Preview navigation">
   <button type="button" data-nav="fishing" class="on">
-    <span class="nav-ico">◉</span><span>Fishing</span>
+    <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 12c3.2-4.2 6.6-6.2 10.3-6 3.1.2 5.5 1.6 7.2 4.2-1.7 2.6-4.1 4-7.2 4.2C9.6 14.6 6.2 12.6 3 8.4V12Z"/><path d="M3 8.4 0 5v7l3-3.6Z"/><circle cx="15.8" cy="9.4" r="1" fill="white"/></svg></span><span>Fishing</span>
   </button>
   <button type="button" data-nav="goals">
-    <span class="nav-ico">◎</span><span>Goals</span>
+    <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12 20 4"/></svg></span><span>Goals</span>
   </button>
   <button type="button" data-nav="stats">
-    <span class="nav-ico">▥</span><span>Stats</span>
+    <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span><span>Stats</span>
   </button>
   <button type="button" data-nav="guide">
-    <span class="nav-ico">▤</span><span>Guide</span>
+    <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 5.5C6 4 9 4.3 12 6v14c-3-1.7-6-2-9-.5v-14Z"/><path d="M21 5.5C18 4 15 4.3 12 6v14c3-1.7 6-2 9-.5v-14Z"/></svg></span><span>Guide</span>
   </button>
 </nav>
 
