@@ -649,6 +649,92 @@ body{
 .preview-bottom-nav .nav-ico{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px}
 .preview-bottom-nav .nav-ico svg{width:18px;height:18px}
 
+
+/* preview-specific dark theme */
+:root[data-theme="dark"]{
+  --pv-blue:#45c6de;
+  --pv-blue-2:#2ca9c2;
+  --pv-blue-soft:#153a46;
+  --pv-ink:#d8edf2;
+  --pv-muted:#89a9b4;
+  --pv-border:#214a5a;
+  --pv-card:#102a35;
+  --pv-ground:#081a22;
+}
+:root[data-theme="dark"] body{
+  background:
+    radial-gradient(100% 35% at 50% 0%,rgba(69,198,222,.13),transparent 70%),
+    linear-gradient(180deg,#081b24,#0a202a 50%,#071820);
+  color:var(--pv-ink);
+}
+:root[data-theme="dark"] .preview-lake-select,
+:root[data-theme="dark"] .preview-set-pill,
+:root[data-theme="dark"] .panel,
+:root[data-theme="dark"] .preview-more,
+:root[data-theme="dark"] .preview-lake-row,
+:root[data-theme="dark"] .preview-event-options button,
+:root[data-theme="dark"] .preview-stat,
+:root[data-theme="dark"] .preview-guide-card{
+  background:#102a35;
+  border-color:#214a5a;
+  color:var(--pv-ink);
+  box-shadow:0 8px 26px #00000033;
+}
+:root[data-theme="dark"] .preview-lake-row.on,
+:root[data-theme="dark"] .preview-event-options button.on{
+  background:#153a46;
+  border-color:#2f7184;
+}
+:root[data-theme="dark"] .preview-goal-icon{
+  background:#12392f;
+  color:#60d7a3;
+}
+:root[data-theme="dark"] .preview-goal-track,
+:root[data-theme="dark"] .track{
+  background:#173642;
+}
+:root[data-theme="dark"] .mults button{
+  background:#153541;
+  color:#b8d4dc;
+}
+:root[data-theme="dark"] .mults button[aria-pressed="true"],
+:root[data-theme="dark"] #poolBtn,
+:root[data-theme="dark"] #refillBtn{
+  background:linear-gradient(135deg,#198da5,#24a8bf);
+  color:#fff;
+}
+:root[data-theme="dark"] .plate{
+  background:#0f2934;
+  border-color:#214a5a;
+}
+:root[data-theme="dark"] .meter .acts .btn,
+:root[data-theme="dark"] #undoBtn{
+  background:#153541;
+  color:#b8d4dc;
+}
+:root[data-theme="dark"] .preview-bottom-nav{
+  background:#0d2630ee;
+  border-top-color:#214a5a;
+  box-shadow:0 -8px 28px #00000042;
+}
+:root[data-theme="dark"] .preview-bottom-nav button{color:#7899a4}
+:root[data-theme="dark"] .preview-bottom-nav button.on{color:#45c6de}
+:root[data-theme="dark"] .sheet,
+:root[data-theme="dark"] .preview-sheet{
+  background:#091d26;
+  border-top-color:#214a5a;
+}
+:root[data-theme="dark"] .sheet header{border-bottom-color:#214a5a}
+:root[data-theme="dark"] .seg button{
+  background:#153541;
+  border-color:#214a5a;
+  color:#b8d4dc;
+}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{
+  background:#45c6de;
+  color:#06212a;
+}
+
 </style>
 
 <div class="wrap">
@@ -1747,10 +1833,11 @@ function eventRow(r, dc){
    had the same four rows -- Option 1 has regions with no weight step at all. */
 function regionRows(r){
   const p = methodProgress[r.lake], st = regionStats(r);
-  const rows = isGoldRegion(r) ? [{k:'gate', ok:st.gate}]
-                               : [{k:'mult', ok:st.multOk}];
+  const rows = isGoldRegion(r)
+    ? [{k:'gate', ok:st.gate}]
+    : [{k:'mult', ok:st.multOk}, {k:'leg', ok:st.legOk}];
   if(r.kg !== undefined) rows.push({k:'kg', ok:st.kgOk});
-  rows.push(isGoldRegion(r) ? {k:'scouted', ok:!!p.scouted} : {k:'leg', ok:st.legOk});
+  if(isGoldRegion(r)) rows.push({k:'scouted', ok:!!p.scouted});
   rows.push({k:'event', ok:null});       // a tally, not a completable step
   return rows;
 }
@@ -1844,7 +1931,7 @@ function renderMethod(){
       ? '<b>' + goldFish() + '</b>/' + r.tickets + ' golden fish'
       : '<b>' + legTowards(r.lake) + '</b>/' + r.leg + ' legendary';
     const lc = legTowards(r.lake), mr = multRun(r.lake), g = goldFish();
-    const AUTO = '<span class="manual" style="border:0;padding:0;margin-left:6px">auto</span>';
+    const AUTO = '';
     /* Built from regionRows so the rows and their tick flags stay in step. */
     const ROW = {
       gate: ok =>
@@ -2209,19 +2296,29 @@ $('previewBottomNav').addEventListener('click', e => {
 /* theme */
 function applyTheme(){
   const root = document.documentElement;
-  if(themePref === 'auto') root.removeAttribute('data-theme');
-  else root.setAttribute('data-theme', themePref);
+  if(themePref === 'auto'){
+    const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    root.setAttribute('data-theme', dark ? 'dark' : 'light');
+  }else{
+    root.setAttribute('data-theme', themePref);
+  }
 }
 $('themeSeg').addEventListener('click', e => {
   const b = e.target.closest('[data-theme-val]');
   if(!b) return;
   themePref = b.dataset.themeVal;
   store.set('themePref', themePref);
-  applyTheme(); renderMenu();
+  applyTheme();
+  renderMenu();
 });
+if(window.matchMedia){
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const syncAutoTheme = () => { if(themePref === 'auto'){ applyTheme(); renderMenu(); } };
+  if(mq.addEventListener) mq.addEventListener('change', syncAutoTheme);
+  else if(mq.addListener) mq.addListener(syncAutoTheme);
+}
 
 load();
-themePref = 'light';
 applyTheme();
 render();
 </script>
