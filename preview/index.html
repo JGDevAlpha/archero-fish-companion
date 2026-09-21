@@ -755,6 +755,98 @@ body{
 :root[data-theme="dark"] .version-switch{background:#153541;border-color:#214a5a}
 :root[data-theme="dark"] .version-switch a[aria-current="page"]{background:#102a35;color:#45c6de}
 
+
+/* set dropdown */
+.preview-set-select-wrap{
+  position:relative;height:42px;min-width:82px;display:flex;align-items:center;
+}
+.preview-set-select{
+  width:100%;height:42px;appearance:none;-webkit-appearance:none;
+  padding:0 28px 0 12px;border:1px solid var(--pv-border);border-radius:13px;
+  background:var(--pv-card);color:var(--pv-ink);font:inherit;font-size:.74rem;font-weight:750;
+  box-shadow:0 7px 24px #14384a0d;cursor:pointer;
+}
+.preview-set-chevron{
+  position:absolute;right:10px;pointer-events:none;color:var(--pv-muted);font-size:.9rem
+}
+.preview-event-body{padding:10px 12px calc(18px + env(safe-area-inset-bottom,0px))!important}
+.preview-event-host{
+  margin-bottom:8px;padding:10px 12px;border:1px solid var(--pv-border);border-radius:13px;
+  background:var(--pv-card);font-size:.68rem;line-height:1.4;color:var(--pv-muted)
+}
+.preview-event-host b{display:block;color:var(--pv-ink);font-size:.78rem;margin-bottom:2px}
+.preview-event-picker{display:grid;gap:7px}
+.preview-event-choice{
+  min-height:54px;padding:9px 11px;border:1px solid var(--pv-border);border-radius:13px;
+  background:var(--pv-card);color:var(--pv-ink);font:inherit;text-align:left;cursor:pointer;
+  display:grid;grid-template-columns:34px 1fr auto;gap:9px;align-items:center;
+}
+.preview-event-choice .event-ico{
+  width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--pv-blue-soft);color:var(--pv-blue)
+}
+.preview-event-choice .event-ico svg{width:19px;height:19px}
+.preview-event-choice strong{font-size:.76rem}.preview-event-choice small{display:block;margin-top:2px;font-size:.6rem;color:var(--pv-muted)}
+.preview-event-choice.on{border-color:#7cc9d8;background:var(--pv-blue-soft)}
+.preview-event-choice:disabled{opacity:.45;cursor:not-allowed}
+
+/* Dark-mode readability corrections */
+:root[data-theme="dark"] .preview-set-select{
+  background:#102a35;color:#e1f2f6;border-color:#2a5363;box-shadow:0 7px 24px #0004
+}
+:root[data-theme="dark"] .preview-set-chevron{color:#9fc0ca}
+:root[data-theme="dark"] .preview-goal-title,
+:root[data-theme="dark"] .preview-goal-value,
+:root[data-theme="dark"] .preview-section-label,
+:root[data-theme="dark"] .drawline,
+:root[data-theme="dark"] .drawline b,
+:root[data-theme="dark"] .meter .top .lbl,
+:root[data-theme="dark"] .meter .val,
+:root[data-theme="dark"] .preview-more,
+:root[data-theme="dark"] .preview-more b,
+:root[data-theme="dark"] .preview-stat b,
+:root[data-theme="dark"] .preview-guide-card b,
+:root[data-theme="dark"] .preview-event-host b,
+:root[data-theme="dark"] .preview-event-choice{
+  color:#dff1f5!important
+}
+:root[data-theme="dark"] .preview-goal-kicker,
+:root[data-theme="dark"] .preview-more small,
+:root[data-theme="dark"] .preview-stat small,
+:root[data-theme="dark"] .preview-guide-card span,
+:root[data-theme="dark"] .preview-event-host,
+:root[data-theme="dark"] .preview-event-choice small{
+  color:#91b1bc!important
+}
+:root[data-theme="dark"] .preview-advice-card{
+  background:#12352f!important;border-color:#23594c!important;color:#dff6ee!important
+}
+:root[data-theme="dark"] .preview-advice-card b{color:#72deb3!important}
+:root[data-theme="dark"] #eventBtn .who{color:#b6d0d8!important}
+:root[data-theme="dark"] .icon-btn{
+  background:#183845!important;border-color:#2d5a69!important;color:#dff1f5!important
+}
+:root[data-theme="dark"] .region,
+:root[data-theme="dark"] .quest{
+  color:#d9edf2
+}
+:root[data-theme="dark"] .region .rh h3,
+:root[data-theme="dark"] .region .step .sl,
+:root[data-theme="dark"] .region .goal,
+:root[data-theme="dark"] .quest h3{
+  color:#d9edf2!important
+}
+:root[data-theme="dark"] .region .weightmeta,
+:root[data-theme="dark"] .region .unit,
+:root[data-theme="dark"] .region .manual{
+  color:#8fb0bb!important
+}
+:root[data-theme="dark"] .plans button{
+  background:#153541;color:#d9edf2;border-color:#2a5363
+}
+:root[data-theme="dark"] .plans button[aria-pressed="true"]{
+  background:#168ba3;color:#fff
+}
+
 </style>
 
 <div class="wrap">
@@ -780,7 +872,15 @@ body{
         <span id="previewLakeText">Lakehouse</span>
         <span class="preview-chevron">⌄</span>
       </button>
-      <span class="preview-set-pill">Set <b id="previewSetNow">2</b></span>
+      <label class="preview-set-select-wrap" aria-label="Fish set">
+        <select id="previewSetSelect" class="preview-set-select">
+          <option value="1">Set 1</option>
+          <option value="2">Set 2</option>
+          <option value="3">Set 3</option>
+          <option value="4">Set 4</option>
+        </select>
+        <span class="preview-set-chevron" aria-hidden="true">⌄</span>
+      </label>
     </div>
     <div class="preview-goal panel" id="previewGoal">
       <div class="preview-goal-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12 21 3"/><path d="M16 3h5v5"/></svg></div>
@@ -911,14 +1011,14 @@ body{
 </div>
 
 <nav class="preview-bottom-nav" id="previewBottomNav" aria-label="Preview navigation">
-  <button type="button" data-nav="fishing" class="on">
-    <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 12c3.2-4.2 6.6-6.2 10.3-6 3.1.2 5.5 1.6 7.2 4.2-1.7 2.6-4.1 4-7.2 4.2C9.6 14.6 6.2 12.6 3 8.4V12Z"/><path d="M3 8.4 0 5v7l3-3.6Z"/><circle cx="15.8" cy="9.4" r="1" fill="white"/></svg></span><span>Fishing</span>
+  <button type="button" data-nav="events">
+    <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16 6 6 0 0 1 0-16Z"/></svg></span><span>Event Pools</span>
   </button>
   <button type="button" data-nav="goals">
     <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12 20 4"/></svg></span><span>Goals</span>
   </button>
-  <button type="button" data-nav="stats">
-    <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span><span>Stats</span>
+  <button type="button" data-nav="quests">
+    <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16H5z"/><path d="m8 9 2 2 4-4M8 15h8"/></svg></span><span>Quests</span>
   </button>
   <button type="button" data-nav="guide">
     <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 5.5C6 4 9 4.3 12 6v14c-3-1.7-6-2-9-.5v-14Z"/><path d="M21 5.5C18 4 15 4.3 12 6v14c3-1.7 6-2 9-.5v-14Z"/></svg></span><span>Guide</span>
@@ -941,6 +1041,19 @@ body{
     <span class="preview-sheet-label">Event pool for this rotation</span>
     <div class="preview-event-options" id="previewEventOptions"></div>
     <small>Event pools are only available while fishing Lake 3 or Lake 4.</small>
+  </div>
+</div>
+
+<!-- preview event pool selector -->
+<div class="sheet preview-sheet" id="previewEventSheet" role="dialog" aria-modal="true" aria-label="Event pools" aria-hidden="true">
+  <div class="grab"></div>
+  <header>
+    <h2>Event pools</h2>
+    <button class="icon-btn" data-close aria-label="Close event pools" style="margin-left:auto">×</button>
+  </header>
+  <div class="body preview-event-body">
+    <div class="preview-event-host" id="previewEventHost"></div>
+    <div class="preview-event-picker" id="previewEventPicker"></div>
   </div>
 </div>
 
@@ -978,50 +1091,21 @@ body{
       <b>4. Track broken lines</b>
       <span>Use +1 break immediately below the fishing controls. The 120-line limit stays visible.</span>
     </div>
-    <button class="btn" id="previewOpenSettings" type="button">Open settings & trackers</button>
+    <button class="btn" id="previewOpenSettings" type="button">Open settings</button>
     <a class="preview-live-link" href="../">Open current live version</a>
   </div>
 </div>
 
 <!-- menu -->
-<div class="sheet" id="menuSheet" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true">
+<div class="sheet" id="menuSheet" role="dialog" aria-modal="true" aria-label="Settings" aria-hidden="true">
   <div class="grab"></div>
   <header>
-    <h2>Menu</h2>
-    <button class="icon-btn" data-close aria-label="Close menu" style="margin-left:auto">
+    <h2>Settings</h2>
+    <button class="icon-btn" data-close aria-label="Close settings" style="margin-left:auto">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
     </button>
   </header>
   <div class="body">
-    <div class="mgroup">
-      <span class="lbl">Event pool</span>
-      <div class="seg" id="eventSeg"></div>
-      <span class="lbl" id="eventHint" style="letter-spacing:.02em;text-transform:none;font-weight:500"></span>
-    </div>
-    <div class="mgroup">
-      <span class="lbl">Fish set</span>
-      <div class="seg" id="setSeg"></div>
-      <span class="lbl" id="setHint" style="letter-spacing:.02em;text-transform:none;font-weight:500"></span>
-    </div>
-    <div class="mgroup">
-      <button class="mrow" id="openMethod">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        <span class="t">Method tracker</span>
-        <span class="hint" id="methodHint"></span>
-        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
-      </button>
-      <button class="mrow" id="openQuests">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 17c2.5 0 2.5-10 5-10s2.5 10 5 10 2.5-10 5-10 2.5 5 3 6"/></svg>
-        <span class="t">Quest tracker</span>
-        <span class="hint" id="questHint"></span>
-        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
-      </button>
-      <button class="mrow" id="openInfo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        <span class="t">How to use</span>
-        <span class="hint" id="infoHint">Show</span>
-      </button>
-    </div>
     <div class="mgroup">
       <span class="lbl">Appearance</span>
       <div class="seg" id="themeSeg">
@@ -1748,45 +1832,8 @@ function renderTotals(){
 }
 
 function renderMenu(){
-  // event pool
-  const eseg = $('eventSeg');
-  eseg.innerHTML = '';
-  EVENT_LAKES.forEach(l => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.textContent = TAB_NAME[l];
-    b.setAttribute('aria-pressed', String(l === state.eventLake));
-    b.addEventListener('click', () => setEventLake(l));
-    eseg.appendChild(b);
-  });
-  $('eventHint').textContent =
-    'The game runs one of these per rotation. The other keeps its own catches, and either credits the region you are working.';
-  // fish set
-  const seg = $('setSeg');
-  seg.innerHTML = '';
-  SETS.forEach(s => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.textContent = 'Set ' + s;
-    b.setAttribute('aria-pressed', String(s === state.fishSet));
-    b.addEventListener('click', () => { state.fishSet = s; commit(); });
-    seg.appendChild(b);
-  });
-  const missing = zoneLakes().filter(l => !hasArt(state.fishSet, l));
-  $('setHint').textContent = missing.length
-    ? 'Art pending for ' + missing.map(l => FULL_NAME[l]).join(', ') + '. Counts still work.'
-    : 'Every zone on screen has art.';
-  // hints
-  let left = 0;
-  QUESTS.forEach(q => { left += questStats(q, questProgress[q.name]).left; });
-  $('questHint').textContent = left + 'L left';
-  const done = METHOD.filter(r => regionStats(r).done).length;
-  const next = METHOD.find(r => !regionStats(r).done);
-  $('methodHint').textContent = done === METHOD.length ? 'Complete' : 'Region ' + next.n + ' of 4';
-  $('mDone').textContent = done;
-  $('infoHint').textContent = $('note').hidden ? 'Show' : 'Hide';
-  // theme
   [...$('themeSeg').children].forEach(b =>
     b.setAttribute('aria-pressed', String(b.dataset.themeVal === themePref)));
-  // reset
   const host = $('resetArea');
   host.innerHTML = '';
   if(confirming){
@@ -2212,6 +2259,32 @@ function renderPreviewLakeSheet(){
     opts.appendChild(b);
   });
 }
+function renderPreviewEventSheet(){
+  const base = previewBaseLake();
+  const allowed = ['Oceanic','Polar'].includes(base);
+  const idx = ['Lakehouse','Sunset','Oceanic','Polar'].indexOf(base);
+  const host = $('previewEventHost');
+  host.innerHTML = allowed
+    ? '<b>Lake ' + (idx+1) + ' · ' + FULL_NAME[base] + '</b>Choose which event pool is live for this rotation.'
+    : '<b>Event pools unavailable</b>Dragon Gate and Fullmoon can only appear while fishing Lake 3 or Lake 4.';
+  const picker = $('previewEventPicker');
+  picker.innerHTML = '';
+  EVENT_LAKES.forEach(l => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'preview-event-choice' + (l === state.eventLake ? ' on' : '');
+    b.disabled = !allowed;
+    b.innerHTML = '<span class="event-ico">' + EVENT_ICON[l] + '</span>' +
+      '<span><strong>' + FULL_NAME[l] + '</strong><small>Uses the averages of the lake where it appeared.</small></span>' +
+      '<span>' + (l === state.eventLake ? '✓' : '›') + '</span>';
+    b.addEventListener('click', () => {
+      setEventLake(l);
+      renderPreviewEventSheet();
+      renderPreviewChrome();
+    });
+    picker.appendChild(b);
+  });
+}
 function renderPreviewStats(){
   const host = $('previewStatsBody');
   if(!host) return;
@@ -2234,12 +2307,13 @@ function renderPreviewChrome(){
   $('previewLakeText').textContent = inEvent
     ? 'Lake ' + (idx+1) + ' · ' + TAB_NAME[state.currentLake]
     : 'Lake ' + (idx+1) + ' · ' + TAB_NAME[lake];
-  $('previewSetNow').textContent = state.fishSet;
+  $('previewSetSelect').value = state.fishSet;
   const g = previewGoalInfo();
   $('previewGoalTitle').textContent = g.title;
   $('previewGoalValue').textContent = g.value;
   $('previewGoalFill').style.width = g.pct + '%';
   renderPreviewLakeSheet();
+  renderPreviewEventSheet();
   renderPreviewStats();
 }
 function render(){
@@ -2250,7 +2324,7 @@ function render(){
 }
 
 /* ---------------- sheets ---------------- */
-const SHEETS = ['menuSheet','questSheet','methodSheet','previewLakeSheet','previewStatsSheet','previewGuideSheet'];
+const SHEETS = ['menuSheet','questSheet','methodSheet','previewLakeSheet','previewEventSheet','previewStatsSheet','previewGuideSheet'];
 let openSheetId = null;
 function closeSheets(){
   SHEETS.forEach(id => { $(id).classList.remove('on'); $(id).setAttribute('aria-hidden','true'); });
@@ -2271,10 +2345,6 @@ $('menuBtn').addEventListener('click', () => openSheetId === 'menuSheet' ? close
 $('scrim').addEventListener('click', closeSheets);
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeSheets));
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSheets(); });
-$('openQuests').addEventListener('click', () => openSheet('questSheet'));
-$('openMethod').addEventListener('click', () => openSheet('methodSheet'));
-$('openInfo').addEventListener('click', () => { $('note').hidden = !$('note').hidden; renderMenu(); closeSheets(); });
-
 /* ---------------- wiring ---------------- */
 $('poolBtn').addEventListener('click', catchPool);
 $('eventBtn').addEventListener('click', () => {
@@ -2296,14 +2366,18 @@ $('mClear').addEventListener('click', () => {
 
 /* preview navigation */
 $('previewLakeBtn').addEventListener('click', () => openSheet('previewLakeSheet'));
+$('previewSetSelect').addEventListener('change', e => {
+  const s = e.target.value;
+  if(SETS.includes(s)){ state.fishSet = s; commit(); }
+});
 $('previewDetailsBtn').addEventListener('click', () => openSheet('previewStatsSheet'));
 $('previewOpenSettings').addEventListener('click', () => openSheet('menuSheet'));
 $('previewBottomNav').addEventListener('click', e => {
   const b = e.target.closest('[data-nav]'); if(!b) return;
   [...$('previewBottomNav').querySelectorAll('button')].forEach(x => x.classList.toggle('on', x === b));
-  if(b.dataset.nav === 'fishing'){ closeSheets(); window.scrollTo({top:0,behavior:'smooth'}); }
+  if(b.dataset.nav === 'events') openSheet('previewEventSheet');
   else if(b.dataset.nav === 'goals') openSheet('methodSheet');
-  else if(b.dataset.nav === 'stats') openSheet('previewStatsSheet');
+  else if(b.dataset.nav === 'quests') openSheet('questSheet');
   else if(b.dataset.nav === 'guide') openSheet('previewGuideSheet');
 });
 
